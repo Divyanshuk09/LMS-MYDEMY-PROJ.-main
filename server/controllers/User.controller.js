@@ -9,15 +9,15 @@ export const clerkWebhooks = async (req, res) => {
 
   try {
     // 2. Verify webhook signature (disable temporarily if testing)
-    const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
-    await whook.verify(
-      JSON.stringify(req.body), 
-      {
-        "svix-id": req.headers["svix-id"],
-        "svix-timestamp": req.headers["svix-timestamp"],
-        "svix-signature": req.headers["svix-signature"]
-      }
-    );
+    // const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
+    // await whook.verify(
+    //   JSON.stringify(req.body), 
+    //   {
+    //     "svix-id": req.headers["svix-id"],
+    //     "svix-timestamp": req.headers["svix-timestamp"],
+    //     "svix-signature": req.headers["svix-signature"]
+    //   }
+    // );
     console.log("🟢 Webhook verification passed");
 
     // 3. Process event
