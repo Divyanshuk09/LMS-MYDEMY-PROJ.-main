@@ -9,8 +9,7 @@ export const clerkWebhooks = async (req, res) => {
         const svixHeaders = {
             id: req.headers["svix-id"],
             timestamp: req.headers["svix-timestamp"],
-            signature: req.headers["svix-signature"],
-            // ?.split(',')[0] + '...'
+            signature: req.headers["svix-signature"]?.split(',')[0] + '...'  // this can be reason of error
         };
 
         await whook.verify(
@@ -22,16 +21,13 @@ export const clerkWebhooks = async (req, res) => {
             }
         );
 
-        // 3. Event processing
         const { data, type } = req.body;
 
         switch (type) {
             case "user.created": {
                 const userData = {
                     _id: data.id,
-                    email: data.email_addresses[0]?.email_address,
-                    //  || "no-email@example.com",
-                    // name: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
+                    email: data.email_addresses[0]?.email_address || "no-email@example.com",
                     name: data.first_name + " " + data.last_name,
                     imageUrl: data.image_url || ""
                 };
@@ -44,7 +40,6 @@ export const clerkWebhooks = async (req, res) => {
                 const userData = {
                     email: data.email_addresses[0]?.email_address,
                     name: data.first_name + " " + data.last_name,
-                    // name: `${data.first_name} ${data.last_name}`,
                     imageUrl: data.image_url
                 };
 
