@@ -135,7 +135,7 @@ export const dummyCourses = [
                 "chapterContent": [
                     {
                         "lectureId": "lecture1",
-                        "lectureTitle": "What is JavaScript?",
+                        "lectureT itle": "What is JavaScript?",
                         "lectureDuration": 16,
                         "lectureUrl": "https://youtu.be/CBWnBi-awSA",
                         "isPreviewFree": true,

@@ -1,28 +1,44 @@
-import express from 'express';
 import dotenv from 'dotenv';
+import express from 'express';
 import cors from 'cors';
 import connectDB from './DB/index.js';
-import { clerkWebhooks } from './controllers/User.controller.js';
+import { clerkMiddleware } from '@clerk/express';
+import connectCloudinary from './configs/cloudinary.js';
 
 dotenv.config()
-const app=express()
+const app = express()
 
 
 //middleware
 app.use(cors())
+app.use(clerkMiddleware())
 
 //db function
-connectDB()
+await connectDB()
 
-//routes
-app.get('/',(req,res)=>{
+//cloudinary connect function
+await connectCloudinary()
+
+//import of routes from routes folder:
+import { clerkWebhooks } from './controllers/Webhook.controller.js';
+import educatorRouter from './routes/Educator.route.js';
+import courseRouter from './routes/Course.route.js';
+import userRouter from './routes/User.route.js';
+
+
+//routes:
+app.get('/', (req, res) => {
     res.send('API is working!')
 })
-app.post('/clerk',express.json(), clerkWebhooks)
+
+app.post('/clerk', express.json(), clerkWebhooks)
+app.use('/api/educator', express.json(), educatorRouter)
+app.use('/api/course', express.json(), courseRouter)
+app.use('/api/user', express.json(), userRouter)
 
 //server is running on
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT,()=>{
+app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 })

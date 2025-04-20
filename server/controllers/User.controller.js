@@ -1,65 +1,44 @@
 import User from "../models/User.model.js";
-import { Webhook } from "svix";
+import Course from '../models/Course.model.js'
 
-export const clerkWebhooks = async (req, res) => {
-
+//get the userData from the db
+export const getUserData = async (req,res) => {
     try {
-        const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
-
-        const svixHeaders = {
-            id: req.headers["svix-id"],
-            timestamp: req.headers["svix-timestamp"],
-            signature: req.headers["svix-signature"]?.split(',')[0] + '...'  // this can be reason of error
-        };
-
-        await whook.verify(
-            JSON.stringify(req.body),
-            {
-                "svix-id": svixHeaders.id,
-                "svix-timestamp": svixHeaders.timestamp,
-                "svix-signature": req.headers["svix-signature"]
-            }
-        );
-
-        const { data, type } = req.body;
-
-        switch (type) {
-            case "user.created": {
-                const userData = {
-                    _id: data.id,
-                    email: data.email_addresses[0]?.email_address || "no-email@example.com",
-                    name: data.first_name + " " + data.last_name,
-                    imageUrl: data.image_url || ""
-                };
-
-                const createdUser = await User.create(userData);
-                return res.json({ success: true });
-            }
-
-            case "user.updated": {
-                const userData = {
-                    email: data.email_addresses[0]?.email_address,
-                    name: data.first_name + " " + data.last_name,
-                    imageUrl: data.image_url
-                };
-
-                const updatedUser = await User.findByIdAndUpdate(data.id, userData);
-                return res.json({ success: true });
-            }
-
-            case "user.deleted": {
-                await User.findByIdAndDelete(data.id);
-                return res.json({ success: true });
-            }
-
-            default:
-                return res.status(200).json({ message: "Event not handled" });
+        const userId = req.auth.userId
+        const user = await User.findById(userId)
+        if (!user) {
+            return res.json({
+                success:false,
+                message:"User Not found"
+            })            
         }
-    } catch (error) {
+        return res.json({
+            success:true,
+            user
+        })
 
-        return res.status(500).json({
-            success: false,
-            message: "Internal server error",
+    } catch (error) {
+        return res.json({
+                success:false,
+                message:"User Not found"
+            }) 
+    }
+}
+
+//users enrolled courses with lecture links
+export const userEnrolledCourses = async (req,res) => {
+    try {
+        const userId = req.auth.userId
+        const userData = await User.findById(userId).populate('enrolledCourses')
+
+        return res.json({
+            success:true,
+            enrolledCourses: userData.enrolledCourses
+        })
+    } catch (error) { 
+        return res.json({
+            success:false,
+            message:error.message
         })
     }
-};
+}
