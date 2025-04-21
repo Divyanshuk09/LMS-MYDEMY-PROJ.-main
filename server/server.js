@@ -20,7 +20,7 @@ await connectDB()
 await connectCloudinary()
 
 //import of routes from routes folder:
-import { clerkWebhooks } from './controllers/Webhook.controller.js';
+import { clerkWebhooks, stripeWebhooks } from './controllers/Webhook.controller.js';
 import educatorRouter from './routes/Educator.route.js';
 import courseRouter from './routes/Course.route.js';
 import userRouter from './routes/User.route.js';
@@ -35,6 +35,8 @@ app.post('/clerk', express.json(), clerkWebhooks)
 app.use('/api/educator', express.json(), educatorRouter)
 app.use('/api/course', express.json(), courseRouter)
 app.use('/api/user', express.json(), userRouter)
+app.post('/stripe',express.raw({type:'application/json'}),stripeWebhooks)
+
 
 //server is running on
 const PORT = process.env.PORT || 5000;
