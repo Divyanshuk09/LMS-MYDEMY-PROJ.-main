@@ -49,7 +49,7 @@ const CourseDetails = () => {
         {/* Left Column */}
         <div className="max-w-xl z-10 text-gray-500">
           <h1 className="md:text-[44px] text-lg font-semibold text-gray-800">
-            {courseData.courseTitle}
+            {courseData?.courseTitle}
           </h1>
           <p
             className="md:text-base md:pt-2 text-sm"
@@ -74,12 +74,12 @@ const CourseDetails = () => {
             </div>
             <div className="flex items-center gap-2">
               <p className="text-blue-500 md:text-sm text-xs">
-                ({courseData.courseRatings.length}{" "}
-                {courseData.courseRatings.length > 1 ? "ratings" : "rating"})
+                ({courseData?.courseRatings.length}{" "}
+                {courseData?.courseRatings.length > 1 ? "ratings" : "rating"})
               </p>
               <span className="md:text-sm text-xs mt-0.5">
-                {courseData.enrolledStudents.length}{" "}
-                {courseData.enrolledStudents.length > 1
+                {courseData?.enrolledStudents?.length}{" "}
+                {courseData?.enrolledStudents?.length > 1
                   ? "students"
                   : "student"}
               </span>
@@ -90,7 +90,7 @@ const CourseDetails = () => {
           <p className="text-xs md:text-sm mt-2">
             Course by:{" "}
             <span className="text-blue-500 underline">
-              {courseData.educator}
+              {courseData?.educator?.name}
             </span>
           </p>
 
@@ -98,7 +98,7 @@ const CourseDetails = () => {
           <div className="pt-8 text-gray-800">
             <h1 className="text-xl font-semibold">Course Structure</h1>
             <div className="pt-5">
-              {courseData.courseContent.map((chapter, index) => (
+              {courseData?.courseContent?.map((chapter, index) => (
                 <div key={index} className="mt-1">
                   {/* Chapter Header */}
                   <div

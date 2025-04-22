@@ -5,9 +5,13 @@ import humanizeDuration from "humanize-duration";
 import { useNavigate } from "react-router-dom";
 import { useAuth, useUser } from "@clerk/clerk-react";
 
+import axios from "axios";
+import { toast } from "react-toastify";
+
 export const AppContext = createContext();
 
 export const AppContextProvider = (props) => {
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const currency = import.meta.env.VITE_CURRENCY;
   const navigate = useNavigate();
 
@@ -15,12 +19,22 @@ export const AppContextProvider = (props) => {
   const { user } = useUser();
 
   const [allcourses, setAllcourses] = useState([]);
-  const [isEducator, setIsEducator] = useState(true);
+  const [isEducator, setIsEducator] = useState(false);
   const [enrolledcourses, setEnrolledcourses] = useState([]);
 
   //fetch all courses
   async function fetchallcourses() {
     setAllcourses(dummyCourses);
+    try {
+      const { data } = await axios.get(backendUrl + "/api/course/all-courses");
+      if (data.success) {
+        setAllcourses(data.courses);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
   }
 
   //function to calculate average rating of course
@@ -52,7 +66,7 @@ export const AppContextProvider = (props) => {
 
   const calculateCourseDuration = (course) => {
     let time = 0;
-    course.courseContent.forEach((chapter) => {
+    course?.courseContent?.forEach((chapter) => {
       chapter.chapterContent.forEach((lecture) => {
         time += lecture.lectureDuration;
       });
@@ -64,7 +78,7 @@ export const AppContextProvider = (props) => {
 
   const calculateNoOfLectures = (course) => {
     let totallectures = 0;
-    course.courseContent.forEach((chapter) => {
+    course?.courseContent?.forEach((chapter) => {
       if (Array.isArray(chapter.chapterContent)) {
         totallectures += chapter.chapterContent.length;
       }

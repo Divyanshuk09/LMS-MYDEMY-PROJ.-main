@@ -14,11 +14,14 @@ import MyCourses from "./Pages/Educator/MyCourses";
 import StudentEnrolled from "./Pages/Educator/StudentEnrolled";
 import Navbar from "./Components/Student/Navbar";
 import Hero from "./Components/Student/Hero";
+import {ToastContainer} from 'react-toastify'
+
 const App = () => {
   const isEducatorRoute = useMatch("/educator/*");
 
   return (
     <div className="text-default  min-h-screen bg-white">
+      <ToastContainer/>
       {!isEducatorRoute && <Navbar />}{" "}
       {/* Show Navbar only on student routes, hide on educator routes */}
       <Routes>
