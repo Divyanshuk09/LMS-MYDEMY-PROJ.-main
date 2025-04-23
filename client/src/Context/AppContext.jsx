@@ -21,6 +21,30 @@ export const AppContextProvider = (props) => {
   const [allcourses, setAllcourses] = useState([]);
   const [isEducator, setIsEducator] = useState(false);
   const [enrolledcourses, setEnrolledcourses] = useState([]);
+  const [userData, setUserData] = useState(null);
+
+  //fetch user data
+  async function fetchUserData() {
+    if (user.publicMetadata.role === "educator") {
+      setIsEducator(true);
+    }
+
+    try {
+      const token = await getToken();
+      // console.log(token);
+      const { data } = await axios.get(backendUrl + "/api/user/user-data", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      // console.log(data.user);
+      if (data.success) {
+        setUserData(data.user);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  }
 
   //fetch all courses
   async function fetchallcourses() {
@@ -48,8 +72,7 @@ export const AppContextProvider = (props) => {
       totalRating += rating.rating;
     });
 
-    const avg = totalRating / course.courseRatings.length;
-    return avg;
+    return Math.floor(totalRating / course.courseRatings.length);
   };
 
   //function to calc course chapter time
@@ -88,22 +111,36 @@ export const AppContextProvider = (props) => {
 
   // fetch user enrolled courses
 
-  async function fetchenrolledcourses() {
-    setEnrolledcourses(dummyCourses);
+  async function fetchUserEnrolledCourses() {
+    try {
+      const token = await getToken();
+      const { data } = await axios.get(
+        backendUrl + "/api/user/user-enrolled-courses",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (data.success) {
+        setEnrolledcourses(data.enrolledCourses.reverse());
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
   }
 
   useEffect(() => {
     fetchallcourses();
-    fetchenrolledcourses();
   }, []);
 
-  const logToken = async () => {
-    console.log(await getToken());
-  };
+  // const logToken = async () => {
+  //   console.log(await getToken());
+  // };
 
   useEffect(() => {
     if (user) {
-      logToken();
+      fetchUserData();
+      fetchUserEnrolledCourses();
+      // logToken();
     }
   }, [user]);
 
@@ -118,7 +155,12 @@ export const AppContextProvider = (props) => {
     calculateCourseDuration,
     calculateChapterTime,
     enrolledcourses,
-    fetchenrolledcourses,
+    backendUrl,
+    fetchUserEnrolledCourses,
+    userData,
+    setUserData,
+    getToken,
+    fetchallcourses,
   };
 
   return (

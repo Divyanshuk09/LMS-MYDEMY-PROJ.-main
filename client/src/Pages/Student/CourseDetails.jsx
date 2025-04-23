@@ -9,6 +9,8 @@ import { GiOpenBook } from "react-icons/gi";
 import YouTube from "react-youtube";
 import Footer from "../../Components/Student/Footer";
 import humanizeDuration from "humanize-duration";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const CourseDetails = () => {
   const {
@@ -18,6 +20,9 @@ const CourseDetails = () => {
     calculateNoOfLectures,
     calculateCourseDuration,
     calculateChapterTime,
+    getToken,
+    backendUrl,
+    userData,
   } = useContext(AppContext);
 
   const { id } = useParams();
@@ -26,13 +31,54 @@ const CourseDetails = () => {
   const [isAlreadyEnrolled, setIsAlreadyEnrolled] = useState(false);
   const [playerData, setPlayerData] = useState(null);
   async function fetchCourseData() {
-    const findCourse = allcourses.find((course) => course._id === id);
-    setCourseData(findCourse);
+    try {
+      const { data } = await axios.get(backendUrl + "/api/course/" + id);
+      if (data.success) {
+        setCourseData(data.courseData);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
   }
 
+  const enrollCourse = async () => {
+    try {
+      if (!userData) {
+        return toast.warn("Login to Enroll.");
+      }
+      // console.log("userdata:",userData);
+      if (isAlreadyEnrolled) {
+        return toast.warn("Already Enrolled");
+      }
+      const token = await getToken();
+
+      const { data } = await axios.post(
+        backendUrl + "/api/user/purchase",
+        { courseId: courseData._id },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      console.log(data);
+      if (data.success) {
+        const {session_url} = data
+        window.location.replace(session_url)
+      }else{
+        toast.error(data.message)
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  useEffect(() => {
+    if (userData && courseData) {
+      setIsAlreadyEnrolled(userData.enrolledCourses.includes(courseData._id));
+    }
+  }, [userData, courseData]);
   useEffect(() => {
     fetchCourseData();
-  }, [allcourses]);
+  }, []);
 
   const toggleChapter = (index) => {
     setExpandedChapters((prev) => ({
@@ -181,7 +227,12 @@ const CourseDetails = () => {
         <div className="max-w-xl w-60 mx-auto shadow-xl shadow-gray-400 mt-4 z-10 rounded overflow-hidden bg-white min-w-[300px] sm:min-w-[420px] text-gray-500">
           {playerData ? (
             <div className="relative">
-              <span onClick={()=>setPlayerData(null)} className="absolute right-1 top-1 text-white font-semibold text-2xl cursor-pointer"><MdClose/></span>
+              <span
+                onClick={() => setPlayerData(null)}
+                className="absolute right-1 top-1 text-white font-semibold text-2xl cursor-pointer"
+              >
+                <MdClose />
+              </span>
               <YouTube
                 videoId={playerData.videoId}
                 opts={{
@@ -235,7 +286,8 @@ const CourseDetails = () => {
             </div>
 
             <button
-              className={`mt-2 bg-blue-600 md:text-base text-sm font-mono text-white w-full py-3 rounded font-semibold transition-transform duration-200 ease-in-out hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 hover:bg-blue-500 cursor-pointer`}
+            onClick={enrollCourse}
+              className={` mt-2 bg-blue-600 md:text-base text-sm font-mono text-white w-full py-3 rounded font-semibold transition-transform duration-200 ease-in-out hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 hover:bg-blue-500 cursor-pointer`}
               disabled={isAlreadyEnrolled}
             >
               {isAlreadyEnrolled ? "Already Enrolled" : "Enroll Now"}
@@ -257,7 +309,7 @@ const CourseDetails = () => {
         </div>
       </div>
 
-      <Footer />
+      <Footer /> 
     </>
   ) : (
     <Loading />

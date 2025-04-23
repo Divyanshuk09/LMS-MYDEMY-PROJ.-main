@@ -6,7 +6,7 @@ Route.get('/user-data', getUserData)
 Route.get('/user-enrolled-courses', userEnrolledCourses)
 Route.post('/purchase', PurchaseCourse)
 Route.post('/update-course-progress', UpdateUserCourseProgress)
-Route.get('/get-course-progress', getUserCourseProgress)
+Route.post('/get-course-progress', getUserCourseProgress)
 Route.post('/add-rating', usercourseRating)
 
 export default Route;
