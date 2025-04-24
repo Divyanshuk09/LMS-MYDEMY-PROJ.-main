@@ -4,7 +4,7 @@ import Hero from '../../Components/Student/Hero'
 import Companies from '../../Components/Student/Companies'
 import CourseSection from '../../Components/Student/CourseSection'
 import TestimonialSection from '../../Components/Student/TestimonialSection'
-import CalltoAction from '../../Components/Student/CalltoAction'
+import CalltoAction from '../../Components/Student/CallToAction'
 import Footer from '../../Components/Student/Footer'
 
 const Home = () => {
