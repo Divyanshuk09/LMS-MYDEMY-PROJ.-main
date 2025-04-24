@@ -119,10 +119,13 @@ const AddCourse = () => {
         discount: Number(discount),
         courseContent: chapters,
       };
+      console.log("courseData:",courseData);
 
       const formData = new FormData();
       formData.append("courseData", JSON.stringify(courseData));
       formData.append("image", image);
+
+      console.log("formData:",formData);
 
       const token = await getToken();
       const { data } = await axios.post(
@@ -130,6 +133,8 @@ const AddCourse = () => {
         formData,
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      console.log("Data:::",data);
+
       if (data.success) {
         toast.success(data.message);
         setCoursePrice(0);

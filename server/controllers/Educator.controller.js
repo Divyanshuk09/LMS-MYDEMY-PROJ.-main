@@ -35,6 +35,10 @@ export const addCourse = async (req, res) => {
         const imageFile = req.file;
         const educatorId = req.auth.userId;
 
+        console.log("courseData:",courseData);
+        console.log("imaeFIle:",imageFile);
+        console.log("educator:",educatorId)
+
         if (!imageFile) {
             return res.json({
                 success: false,
@@ -51,6 +55,7 @@ export const addCourse = async (req, res) => {
                 message: 'Invalid courseData format'
             });
         }
+        console.log("paresedData:",parsedCourseData);
         // Upload image to Cloudinary
         const result = await cloudinary.uploader.upload(imageFile.path);
 
