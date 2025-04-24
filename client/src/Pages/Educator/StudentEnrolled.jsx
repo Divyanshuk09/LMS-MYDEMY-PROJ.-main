@@ -1,17 +1,35 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { dummyStudentEnrolled } from "../../assets/assets";
 import Loading from "../../Components/Student/Loading";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { AppContext } from "../../Context/AppContext";
 
 const StudentEnrolled = () => {
   const [enrolledStudents, setEnrolledStudents] = useState(null);
-
-  const fetchenrolledstudents = () => {
-    setEnrolledStudents(dummyStudentEnrolled);
+  const { backendUrl, getToken, isEducator } = useContext(AppContext);
+  const fetchenrolledstudents = async () => {
+    try {
+      const token = await getToken();
+      const { data } = await axios.get(
+        backendUrl + "/api/educator/enrolled-students",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (data.success) {
+        setEnrolledStudents(data.enrolledStudents.reverse());
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
   useEffect(() => {
-    fetchenrolledstudents();
-  }, []);
+    if (isEducator) {
+      fetchenrolledstudents();
+    }
+  }, [isEducator]);
 
   return enrolledStudents ? (
     <>
@@ -32,7 +50,7 @@ const StudentEnrolled = () => {
                     Course Title
                   </th>
                   <th scope="col" className="px-6 py-3">
-                    Purchased on 
+                    Purchased on
                   </th>
                 </tr>
               </thead>
@@ -56,8 +74,12 @@ const StudentEnrolled = () => {
                       />
                       <span>{item.student?.name || "Unknown Student"}</span>
                     </td>
-                    <td className="px-6 py-4 text-gray-900">{item.courseTitle}</td>
-                    <td className="px-6 py-4 text-gray-900">{new Date(item.purchaseDate).toLocaleDateString()}</td>
+                    <td className="px-6 py-4 text-gray-900">
+                      {item.courseTitle}
+                    </td>
+                    <td className="px-6 py-4 text-gray-900">
+                      {new Date(item.purchaseDate).toLocaleDateString()}
+                    </td>
                   </tr>
                 ))}
               </tbody>

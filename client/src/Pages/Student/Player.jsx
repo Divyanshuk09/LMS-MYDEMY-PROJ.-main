@@ -2,27 +2,113 @@ import React, { useContext, useEffect, useState } from "react";
 import humanizeDuration from "humanize-duration";
 import { MdClose, MdPlayCircle } from "react-icons/md";
 import { IoIosArrowDown } from "react-icons/io";
+import { FaCheckCircle } from "react-icons/fa";
 import { AppContext } from "../../Context/AppContext";
 import { useParams } from "react-router-dom";
 import Loading from "../../Components/Student/Loading";
 import YouTube from "react-youtube";
 import Rating from "../../Components/Student/Rating";
-import Footer from '../../Components/Student/Footer'
+import Footer from "../../Components/Student/Footer";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const Player = () => {
-  const { enrolledcourses, calculateChapterTime } = useContext(AppContext);
+  const {
+    enrolledcourses,
+    calculateChapterTime,
+    backendUrl,
+    getToken,
+    userData,
+    fetchUserEnrolledCourses,
+  } = useContext(AppContext);
+
   const { courseId } = useParams();
   const [courseData, setCourseData] = useState(null);
   const [expandedChapters, setExpandedChapters] = useState({});
   const [playerData, setPlayerData] = useState(null);
 
+  const [progressData, setProgressData] = useState(null);
+  const [initialRating, setInitialRating] = useState(0);
+
   const getcoursedata = () => {
-    const course = enrolledcourses.find((c) => c._id === courseId);
-    if (course) setCourseData(course);
+    enrolledcourses.map((course) => {
+      if (course._id === courseId) {
+        setCourseData(course);
+        course.courseRatings.map((item) => {
+          if (item.userId === userData._id) {
+            setInitialRating(item.rating);
+          }
+        });
+      }
+    });
   };
 
+  const markLectureAsCompleted = async (lectureId) => {
+    try {
+      const token = await getToken();
+      const { data } = await axios.post(
+        backendUrl + "/api/user/update-course-progress",
+        { courseId, lectureId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (data.success) {
+        toast.success(data.message);
+        getCourseProgress()
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const getCourseProgress = async () => {
+    try {
+      const token = await getToken();
+      const { data } = await axios.post(
+        backendUrl + "/api/user/get-course-progress",
+        { courseId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (data.success) {
+        setProgressData(data.progressData)
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const handleRating = async (rating) => {
+    try {
+      const token = await getToken();
+      const { data } = await axios.post(
+        backendUrl + "/api/user/add-rating",
+        { courseId, rating },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+        console.log("Daata:",data);
+      if (data.success) {
+        setInitialRating(data.rating)
+        toast.success(data.message);
+        fetchUserEnrolledCourses()
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  }
+
   useEffect(() => {
-    getcoursedata();
+    getCourseProgress()
+  }, []);
+
+  useEffect(() => {
+    if (enrolledcourses.length > 0) {
+      getcoursedata();
+    }
   }, [enrolledcourses]);
 
   useEffect(() => {
@@ -75,8 +161,8 @@ const Player = () => {
                       <ul className="list-disc md:pl-10 pl-4 pr-4 py-2 text-gray-600 border-l border-r border-b border-gray-300">
                         {chapter.chapterContent.map((lecture, i) => (
                           <li key={i} className="flex items-center gap-2 py-1">
-                            {false ? (
-                              "✅"
+                            {progressData && progressData.lectureCompleted.includes(lecture.lectureId) ? (
+                              <FaCheckCircle className="text-blue-500"/>
                             ) : (
                               <MdPlayCircle className="text-blue-500" />
                             )}
@@ -129,17 +215,26 @@ const Player = () => {
 
           <div className="flex items-center gap-2 py-3 mt-10">
             <h1 className="text-xl font-bold">Rate this course:</h1>
-            <Rating initialRating={0} />
+            <Rating initialRating={initialRating} onRate={handleRating} />
           </div>
         </div>
         {/* right column  */}
         <div className="md:mt-10">
           {playerData ? (
-             <div className="relative">
-             <span onClick={()=>setPlayerData(null)} className="absolute right-1 top-1 text-white font-semibold text-2xl cursor-pointer"><MdClose/></span>
+            <div className="relative">
+              <span
+                onClick={() => setPlayerData(null)}
+                className="absolute right-1 top-1 text-white font-semibold text-2xl cursor-pointer"
+              >
+                <MdClose />
+              </span>
               <YouTube
                 videoId={playerData.lectureUrl.split("/").pop()}
-                opts={{ width: "100% ",height:"100%", playerVars: { autoplay: 1 } }}
+                opts={{
+                  width: "100% ",
+                  height: "100%",
+                  playerVars: { autoplay: 1 },
+                }}
                 iframeClassName="w-full aspect-video"
               />
               <div className="flex justify-between items-center mt-2">
@@ -147,9 +242,11 @@ const Player = () => {
                   {playerData.chapter}.{playerData.lecture}{" "}
                   {playerData.lectureTitle}
                 </p>
-                <button className="text-blue-600 hover:underline cursor-pointer"
-                onClick={()=>togglecompletion}>
-                  {false ? "Completed" : "Mark as Completed"}
+                <button
+                  className="text-blue-600 hover:underline cursor-pointer"
+                  onClick={() => markLectureAsCompleted(playerData.lectureId)}
+                >
+                  {progressData && progressData.lectureCompleted.includes(playerData.lectureId) ? "Completed" : "Mark as Completed"}
                 </button>
               </div>
             </div>
@@ -158,12 +255,11 @@ const Player = () => {
           )}
         </div>
       </div>
-    <Footer/>
+      <Footer />
     </>
   ) : (
     <Loading />
   );
 };
-
 
 export default Player;

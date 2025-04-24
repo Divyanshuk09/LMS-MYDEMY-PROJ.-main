@@ -5,73 +5,92 @@ import book from "../../assets/book.png";
 import { AppContext } from "../../Context/AppContext";
 import { dummyDashboardData } from "../../assets/assets";
 import Loading from "../../Components/Student/Loading";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const Dashboard = () => {
-  const { currency } = useContext(AppContext);
+  const { currency, backendUrl, getToken, isEducator } = useContext(AppContext);
   const [dashboardData, setDashboardData] = useState(null);
 
-  const fetchDashboardData = () => {
-    setDashboardData(dummyDashboardData);
+  const fetchDashboardData = async () => {
+    try {
+      const token = await getToken();
+      const { data } = await axios.get(backendUrl + "/api/educator/dashboard", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log("data:", data);
+      if (data.success) {
+        setDashboardData(data.dashboardData);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
   useEffect(() => {
-    fetchDashboardData();
-  }, [dashboardData]);
+    if (isEducator) {
+      fetchDashboardData();
+    }
+  }, [isEducator]);
 
   return dashboardData ? (
     <>
-        <div className="space-y-5 w-full">
-          <div className="flex flex-wrap gap-5 items-center justify-center sm:justify-start">
-            {/* Card 1 */}
-            <div className="flex items-center gap-3 shadow-lg border border-blue-500 p-2 md:p-4 w-full sm:w-56 rounded-md">
-              <img
-                src={student}
-                alt=""
-                className="md:w-10 md:h-10 h-8 w-8 bg-gray-100 rounded"
-              />
-              <div className="flex flex-col">
-                <p className="text-2xl font-medium text-gray-500">
-                  {dashboardData.enrolledStudentsData.length}
-                </p>
-                <p className="text-base text-gray-500">Total Enrollments</p>
-              </div>
+      <div className="space-y-5 w-full">
+        <div className="flex flex-wrap gap-5 items-center justify-center sm:justify-start">
+          {/* Card 1 */}
+          <div className="flex items-center gap-3 shadow-lg border border-blue-500 p-2 md:p-4 w-full sm:w-56 rounded-md">
+            <img
+              src={student}
+              alt=""
+              className="md:w-10 md:h-10 h-8 w-8 bg-gray-100 rounded"
+            />
+            <div className="flex flex-col">
+              <p className="text-2xl font-medium text-gray-500">
+                {dashboardData.enrolledStudentsData.length}
+              </p>
+              <p className="text-base text-gray-500">Total Enrollments</p>
             </div>
+          </div>
 
-            {/* Card 2 */}
-            <div className="flex items-center gap-3 shadow-lg border border-blue-500 p-2 md:p-4 w-full sm:w-56 rounded-md">
-              <img
-                src={book}
-                alt=""
-                className="md:w-10 md:h-10 h-8 w-8 bg-gray-100 rounded"
-              />
-              <div className="flex flex-col">
-                <p className="text-2xl font-medium text-gray-500">
-                  {dashboardData.totalCourses}
-                </p>
-                <p className="text-base text-gray-500">Total Courses</p>
-              </div>
+          {/* Card 2 */}
+          <div className="flex items-center gap-3 shadow-lg border border-blue-500 p-2 md:p-4 w-full sm:w-56 rounded-md">
+            <img
+              src={book}
+              alt=""
+              className="md:w-10 md:h-10 h-8 w-8 bg-gray-100 rounded"
+            />
+            <div className="flex flex-col">
+              <p className="text-2xl font-medium text-gray-500">
+                {dashboardData.totalcourses}
+              </p>
+              <p className="text-base text-gray-500">Total Courses</p>
             </div>
+          </div>
 
-            {/* Card 3 */}
-            <div className="flex items-center gap-3 shadow-lg border border-blue-500 p-2 md:p-4 w-full sm:w-56 rounded-md">
-              <img
-                src={money}
-                alt=""
-                className="md:w-10 md:h-10 h-8 w-8 bg-gray-100 rounded"
-              />
-              <div className="flex flex-col">
-                <p className="text-2xl font-medium text-gray-500 flex">
-                  {currency}
-                  <span>{dashboardData.totalEarnings}</span>
-                </p>
-                <p className="text-base text-gray-500">Total Earnings</p>
-              </div>
+          {/* Card 3 */}
+          <div className="flex items-center gap-3 shadow-lg border border-blue-500 p-2 md:p-4 w-full sm:w-56 rounded-md">
+            <img
+              src={money}
+              alt=""
+              className="md:w-10 md:h-10 h-8 w-8 bg-gray-100 rounded"
+            />
+            <div className="flex flex-col">
+              <p className="text-2xl font-medium text-gray-500 flex">
+                {currency}
+                <span>
+                  {Math.floor(dashboardData.totalEarnings).toFixed(2)}
+                </span>
+              </p>
+              <p className="text-base text-gray-500">Total Earnings</p>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Latest Enrollments Table */}
-        <div className="h-fit flex flex-col items-start justify-between md:p-8 md:pb-0 p-0 md:pt-8 pt-0 pb-0">
+      {/* Latest Enrollments Table */}
+      <div className="h-fit flex flex-col items-start justify-between md:p-8 md:pb-0 p-0 md:pt-8 pt-0 pb-0">
         <div className="w-full">
           <h2 className="text-lg font-medium pb-4 mt-4">Latest Enrollments</h2>
           <div className="relative overflow-x-scroll">
@@ -109,7 +128,9 @@ const Dashboard = () => {
                       />
                       <span>{item.student?.name || "Unknown Student"}</span>
                     </td>
-                    <td className="px-6 py-4 text-gray-900">{item.courseTitle}</td>
+                    <td className="px-6 py-4 text-gray-900">
+                      {item.courseTitle}
+                    </td>
                   </tr>
                 ))}
               </tbody>
