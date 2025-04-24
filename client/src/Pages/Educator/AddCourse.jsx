@@ -66,7 +66,9 @@ const AddCourse = () => {
       setChapters(
         chapters.map((chapter) => {
           if (chapter.chapterId === chapterId) {
-            chapter.chapterContent.splice(lectureIndex, 1);
+            const updatedContent = [...chapter.chapterContent];
+            updatedContent.splice(lectureIndex, 1);
+            return { ...chapter, chapterContent: updatedContent };
           }
           return chapter;
         })
@@ -86,7 +88,10 @@ const AddCourse = () => {
                 : 1,
             lectureId: uniqid(),
           };
-          chapter.chapterContent.push(newLecture);
+          return {
+            ...chapter,
+            chapterContent: [...chapter.chapterContent, newLecture]
+          };
         }
         return chapter;
       })
@@ -105,6 +110,7 @@ const AddCourse = () => {
       e.preventDefault();
       if (!image) {
         toast.error("Thumbnail Image is required!");
+        return;
       }
       const courseData = {
         courseTitle,
@@ -118,30 +124,26 @@ const AddCourse = () => {
       formData.append("courseData", JSON.stringify(courseData));
       formData.append("image", image);
 
-      console.log("formData:", formData);
-
       const token = await getToken();
       const { data } = await axios.post(
         backendUrl + "/api/educator/add-course",
         formData,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log("Data::", data);
       if (data.success) {
-        toast.success(data.message)
-        setCoursePrice(0)
-        setCourseTitle('')
-        setDiscount(0)
-        setImage(null)
-        setChapters([])
-        quillRef.current.root.innerHTML = ''
-      }else{
-        toast.error(data.message)
+        toast.success(data.message);
+        setCoursePrice(0);
+        setCourseTitle('');
+        setDiscount(0);
+        setImage(null);
+        setChapters([]);
+        quillRef.current.root.innerHTML = '';
+      } else {
+        toast.error(data.message);
       }
-      
     } catch (error) {
       console.log("error:", error);
-      toast.error(error.message)
+      toast.error(error.message);
     }
   };
 
@@ -227,8 +229,6 @@ const AddCourse = () => {
             />
           </div>
 
-          {/* Adding chapters and lectures  */}
-
           <div>
             {chapters.map((chapter, chapterIndex) => (
               <div
@@ -268,6 +268,7 @@ const AddCourse = () => {
                           <a
                             href={lecture.lectureUrl}
                             target="_blank"
+                            rel="noopener noreferrer"
                             className="text-blue-500"
                           >
                             Link
@@ -358,7 +359,7 @@ const AddCourse = () => {
                     <input
                       type="checkbox"
                       className="mt-1 scale-125"
-                      value={lectureDetails.isPreviewFree}
+                      checked={lectureDetails.isPreviewFree}
                       onChange={(e) =>
                         setLectureDetails({
                           ...lectureDetails,
