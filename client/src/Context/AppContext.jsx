@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState } from "react";
-import { dummyCourses } from "../assets/assets";
+// import { dummyCourses } from "../assets/assets";
 import { dummyTestimonial } from "../assets/assets";
 import humanizeDuration from "humanize-duration";
 import { useNavigate } from "react-router-dom";
@@ -48,7 +48,7 @@ export const AppContextProvider = (props) => {
 
   //fetch all courses
   async function fetchallcourses() {
-    setAllcourses(dummyCourses);
+    // setAllcourses(dummyCourses);
     try {
       const { data } = await axios.get(backendUrl + "/api/course/all-courses");
       if (data.success) {

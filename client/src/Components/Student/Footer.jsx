@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-900 md:px-36 text-left w-full mt-10">
+    <footer className="bg-gray-900 md:px-36 text-left w-full mt-10 bottom-0">
       <div className="flex flex-col md:flex-row items-start px-8 md:px-0 justify-center gap-10 md:gap-32 py-10 border-b border-white/30">
         {/* Logo & Description */}
         <div className="w-full flex md:items-start items-center flex-col ">
@@ -26,9 +26,9 @@ const Footer = () => {
           <h2 className="text-white mb-5 font-semibold">Company</h2>
           <ul className="flex  md:flex-col w-full justify-between md:text-sm text-xs text-white/80 md:space-y-2">
             <Link to="/" className="hover:underline">Home</Link>
-            <Link to="/about" className="hover:underline">About us</Link>
-            <Link to="/contact" className="hover:underline">Contact us</Link>
-            <Link to="/privacy" className="hover:underline">Privacy policy</Link>
+            <Link to="/" className="hover:underline">About us</Link>
+            <Link to="/" className="hover:underline">Contact us</Link>
+            <Link to="/" className="hover:underline">Privacy policy</Link>
           </ul>
         </div>
 
@@ -54,7 +54,7 @@ const Footer = () => {
       </div>
 
       <p className="py-4 text-center text-xs md:text-sm text-white/60">
-        Copyright 2024 © MyDemy. All Right Reserved.
+        Copyright © MyDemy. All Right Reserved.
       </p>
     </footer>
   );

@@ -29,7 +29,7 @@ const CourseList = ({ data }) => {
 
   return (
     <>
-      <div className="relative md:px-36 sm:px-12 md:pt-20 pt-5 text-left">
+      <div className="relative md:px-36 sm:px-12 md:pt-20 pt-5 text-left h-110">
         <div className="flex md:flex-row flex-col gap-6 items-start px-4 md:px-0 justify-between w-full">
           <div>
             <h1 className="md:text-4xl text-2xl font-semibold ">Course List</h1>
@@ -58,9 +58,6 @@ const CourseList = ({ data }) => {
             ))}
           </div>
 
-          <button className="text-gray-500 border cursor-pointer border-gray-500/30 px-10 py-3 rounded hover:bg-gray-200 hover:underline">
-            Load More
-          </button>
         </div>
       </div>
       <Footer />
