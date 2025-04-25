@@ -107,12 +107,20 @@ This is the backend service for the **MyDemy Learning Management System (LMS)**.
 3. Create a .env file in the server folder and add the following variables:
    ```
    PORT=5000
+   CURRENCY='USD'
    MONGO_URI=your_mongodb_connection_string
+    
+   CLERK_WEBHOOK_SECRET= your_clerk_webhook_secret
+   CLERK_PUBLISHABLE_KEY= your_clerk_publishable_key
+   CLERK_SECRET_KEY= your_clerk_secret_key
+  
    STRIPE_SECRET_KEY=your_stripe_secret_key
+   STRIPE_PUBLISHABLE_KEY =your_stripe_publishable_key
+   STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
+
    CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
    CLOUDINARY_API_KEY=your_cloudinary_api_key
    CLOUDINARY_API_SECRET=your_cloudinary_api_secret
-   CLERK_API_KEY=your_clerk_api_key
    ```
 4. Start the server"
 
