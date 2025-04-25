@@ -59,7 +59,7 @@ const MyEnrollments = () => {
 
   return (
     <>
-      <div className="md:px-36 px-2 pt-10 h-110">
+      <div className="md:px-36 px-2 pt-10">
         <h1 className="text-2xl font-semibold">My Enrollments</h1>
         <table className="md:table-auto table-fixed w-full overflow-auto border border-gray-500/70 mt-10">
           <thead className="text-gray-900 border-b border-gray-500/20 text-sm text-left">
