@@ -3,7 +3,7 @@ import student from "../../assets/student.png";
 import money from "../../assets/money.png";
 import book from "../../assets/book.png";
 import { AppContext } from "../../Context/AppContext";
-import { dummyDashboardData } from "../../assets/assets";
+// import { dummyDashboardData } from "../../assets/assets";
 import Loading from "../../Components/Student/Loading";
 import axios from "axios";
 import { toast } from "react-toastify";

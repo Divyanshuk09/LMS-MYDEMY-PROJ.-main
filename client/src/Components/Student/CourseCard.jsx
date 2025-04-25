@@ -11,10 +11,10 @@ const CourseCard = ({ course }) => {
         onClick={() => scrollTo(0, 0)}
         className="border border-gray-500/30 pb-6 overflow-hidden rounded-lg shadow-md shadow-gray-400 z-10"
       >
-        <img className="w-full" src={course.courseThumbnail} alt="" />
+        <img className="w-full" src={course?.courseThumbnail} alt="" />
         <div className="p-3 text-left">
-          <h3 className="md:text-base text-sm  font-semibold">{course.courseTitle}</h3>
-          <p className="text-gray-500">{course.educator.name}</p>
+          <h3 className="md:text-base text-sm  font-semibold">{course?.courseTitle}</h3>
+          <p className="text-gray-500">{course?.educator?.name}</p>
 
           <div className="flex items-center space-x-2">
             <p className="text-sm ">{calculateRating(course)}</p>
@@ -30,7 +30,7 @@ const CourseCard = ({ course }) => {
               ))}
             </div>
 
-            <p className="text-blue-500">({course.courseRatings.length})</p>
+            <p className="text-blue-500">({course?.courseRatings?.length})</p>
           </div>
           <p className="text-base font-semibold text-gray-500">
             {currency}

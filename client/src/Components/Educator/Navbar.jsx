@@ -1,12 +1,12 @@
 import React from "react";
 import logo from "/LOGO.png";
 import { FaUserCircle } from "react-icons/fa";
-import { dummyEducatorData } from "../../assets/assets";
+// import { dummyEducatorData } from "../../assets/assets";
 import { Link, NavLink } from "react-router-dom";
 import { UserButton, useUser } from "@clerk/clerk-react";
 
 const Navbar = () => {
-  const educatorData = dummyEducatorData;
+  // const educatorData = dummyEducatorData;
   const { user } = useUser();
 
   return (

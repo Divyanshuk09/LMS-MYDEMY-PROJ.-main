@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { dummyStudentEnrolled } from "../../assets/assets";
+// import { dummyStudentEnrolled } from "../../assets/assets";
 import Loading from "../../Components/Student/Loading";
 import axios from "axios";
 import { toast } from "react-toastify";

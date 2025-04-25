@@ -19,12 +19,12 @@ const TestimonialSection = () => {
             <div className="flex items-center gap-4 md:px-5 px-4 md:py-4 py-2 bg-gray-500/10 ">
               <img
                 className="w-11 h-12 rounded-full"
-                src={testimonials.image}
-                alt={testimonials.name}
+                src={testimonials?.image}
+                alt={testimonials?.name}
               />
               <div className="flex flex-col">
-                <h1 className="md:text-lg text-xs font-medium text-gray-500">{testimonials.name}</h1>
-                <p className="text-gray-800/80 md:text-base text-[10px]">{testimonials.role}</p>
+                <h1 className="md:text-lg text-xs font-medium text-gray-500">{testimonials?.name}</h1>
+                <p className="text-gray-800/80 md:text-base text-[10px]">{testimonials?.role}</p>
               </div>
             </div>
               <div className="p-5 pb-7">
@@ -39,7 +39,7 @@ const TestimonialSection = () => {
                       </span>
                     ))}
                 </div>
-                <p className="text-gray-500 mt-5 text-xs md:text-[14px] text-balance">{testimonials.feedback}</p>
+                <p className="text-gray-500 mt-5 text-xs md:text-[14px] text-balance">{testimonials?.feedback}</p>
               </div>
               <a href="#" className="text-blue-500 hover:underline px-5"> Read more</a>
           </div>
