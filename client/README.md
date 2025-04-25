@@ -1,12 +1,101 @@
-# React + Vite
+# MyDemy LMS - Client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Currently, two official plugins are available:
+The frontend for MyDemy, a modern Learning Management System built with React, Vite, and TailwindCSS. This client application provides an intuitive interface for students and educators to manage courses, track progress, and facilitate online learning.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## ✨ Key Features
 
-## Expanding the ESLint configuration
+### 🎓 For Students
+- Browse and enroll in courses with seamless payment integration
+- Track learning progress with visual indicators
+- Interactive video lectures with playback controls
+- Course rating and review system
+- Personalized dashboard with recommended courses
 
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 👩‍🏫 For Educators
+- Comprehensive course management system
+- Lecture and chapter organization tools
+- Student enrollment analytics
+- Revenue tracking and payout overview
+- Course performance metrics
+
+### 🌐 Platform Features
+- Responsive design for all devices
+- Secure authentication with Clerk
+- Stripe integration for payments
+- Dark/Light mode support
+- Accessibility optimized UI
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js v16+
+- npm or yarn
+- [Clerk](https://clerk.dev/) account
+- [Backend server](https://github.com/your-repo/server) running
+
+### Installation
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-repo/mydemy-client.git
+   cd mydemy-client
+   ```
+
+2. Install Dependencies:
+    
+    ```npm install```
+
+3. Set Up Environment Variables: Create a .env file in the client folder and add the following variables:
+
+    ```
+    VITE_BACKEND_URL=http://localhost:5000
+    VITE_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+    VITE_CURRENCY=$
+    ```
+
+4. Run the Development Server:
+
+    ```npm run dev```
+
+5. Access the Application: Open your browser and navigate to http://localhost:5173.
+
+
+### Folder Structure
+
+```
+client/
+├── public/                 # Static assets
+├── src/
+│   ├── assets/             # Images, icons, and dummy data
+│   ├── Components/         # Reusable React components
+│   │   ├── Educator/       # Educator-specific components
+│   │   ├── Student/        # Student-specific components
+│   ├── Context/            # React Context for global state management
+│   ├── Pages/              # Page components for routing
+│   │   ├── Educator/       # Educator-specific pages
+│   │   ├── Student/        # Student-specific pages
+│   ├── App.jsx             # Main application component
+│   ├──             # Entry point for the React app
+│   ├──              # Global styles
+├── .env                    # Environment variables
+├── .gitignore              # Files to ignore in Git
+├── package.json            # Project metadata and dependencies
+├── README.md               # Documentation
+```
+
+#### How to Use This Project
+1. Customize the Frontend:
+
+* Modify the components in the src/Components folder to fit your design.
+* Update the pages in the src/Pages folder to add or remove features.
+2. Connect to Your Backend:
+* Update the VITE_BACKEND_URL in the .env file to point to your backend server.
+3. Deploy the Application:
+
+* Use platforms like Vercel, Netlify, or AWS to deploy the frontend.
+
+### Contributing
+Feel free to fork this repository and submit pull requests. Contributions are welcome!
+
+### License
+This project is licensed under the MIT License. See the LICENSE file for details.
