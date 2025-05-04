@@ -10,11 +10,11 @@ const MyEnrollments = () => {
   const {
     enrolledcourses,
     fetchUserEnrolledCourses,
-    calculateCourseDuration,
     navigate,
     userData,
     backendUrl,
     getToken,
+    calculateCourseDuration,
     calculateNoOfLectures,
   } = useContext(AppContext);
 

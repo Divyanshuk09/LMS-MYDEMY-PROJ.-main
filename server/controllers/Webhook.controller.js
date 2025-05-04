@@ -5,52 +5,51 @@ import Purchase from "../models/Purchase.model.js";
 import Course from "../models/Course.model.js";
 
 export const clerkWebhooks = async (req, res) => {
-
     try {
         const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
 
-        const svixHeaders = {
-            id: req.headers["svix-id"],
-            timestamp: req.headers["svix-timestamp"],
-            signature: req.headers["svix-signature"]?.split(',')[0] + '...'  // this can be reason of error
-        };
-
+        // Verify the webhook
         await whook.verify(
             JSON.stringify(req.body),
             {
-                "svix-id": svixHeaders.id,
-                "svix-timestamp": svixHeaders.timestamp,
+                "svix-id": req.headers["svix-id"],
+                "svix-timestamp": req.headers["svix-timestamp"],
                 "svix-signature": req.headers["svix-signature"]
             }
         );
 
         const { data, type } = req.body;
-
+        
         switch (type) {
             case "user.created": {
+                if (!data.id) throw new Error("User ID is required");
+                
                 const userData = {
                     _id: data.id,
-                    email: data.email_addresses[0]?.email_address || "no-email@example.com",
-                    name: data.first_name + " " + data.last_name,
+                    email: data.email_addresses?.[0]?.email_address || "no-email@example.com",
+                    name: `${data.first_name || ''} ${data.last_name || ''}`.trim() || "Anonymous",
                     imageUrl: data.image_url || ""
                 };
-
-                const createdUser = await User.create(userData);
+                
+                await User.create(userData);
                 return res.json({ success: true });
             }
 
             case "user.updated": {
+                if (!data.id) throw new Error("User ID is required");
+                
                 const userData = {
-                    email: data.email_addresses[0]?.email_address,
-                    name: data.first_name + " " + data.last_name,
+                    email: data.email_addresses?.[0]?.email_address,
+                    name: `${data.first_name || ''} ${data.last_name || ''}`.trim(),
                     imageUrl: data.image_url
                 };
 
-                const updatedUser = await User.findByIdAndUpdate(data.id, userData);
+                await User.findByIdAndUpdate(data.id, userData, { new: true });
                 return res.json({ success: true });
             }
 
             case "user.deleted": {
+                if (!data.id) throw new Error("User ID is required");
                 await User.findByIdAndDelete(data.id);
                 return res.json({ success: true });
             }
@@ -59,14 +58,22 @@ export const clerkWebhooks = async (req, res) => {
                 return res.status(200).json({ message: "Event not handled" });
         }
     } catch (error) {
-
+        console.error("Webhook error:", error);
+        
+        // Differentiate between verification errors and other errors
+        if (error instanceof WebhookVerificationError) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid signature"
+            });
+        }
+        
         return res.status(500).json({
             success: false,
             message: error.message
-        })
+        });
     }
 };
-
 const stripInstance = new Stripe(process.env.STRIPE_SECRET_KEY)
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET
 

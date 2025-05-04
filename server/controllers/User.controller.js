@@ -8,24 +8,36 @@ import { response } from 'express';
 //get the userData from the db
 export const getUserData = async (req, res) => {
     try {
-        const userId = req.auth.userId
-        const user = await User.findById(userId)
-        if (!user) {
-            return res.json({
+        const userId = req.auth.userId;
+        
+        if (!userId) {
+            return res.status(400).json({
                 success: false,
-                message: "User Not found"
-            })
+                message: "User ID is required"
+            });
         }
-        return res.json({
+
+        const user = await User.findById(userId).select('-password -__v'); // Excluding sensitive/uneeded fields
+        
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        return res.status(200).json({
             success: true,
             user
-        })
+        });
 
     } catch (error) {
-        return res.json({
+        console.error("Error in getUserData:", error);
+        
+        return res.status(500).json({
             success: false,
-            message: "User Not found"
-        })
+            message: "Internal server error"
+        });
     }
 }
 
