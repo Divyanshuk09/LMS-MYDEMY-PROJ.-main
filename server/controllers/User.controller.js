@@ -69,7 +69,7 @@ export const PurchaseCourse = async (req, res) => {
         if (!courseId) {
             return res.status(400).json({success:false,message:'Course Id is required'})
         }
-        const userData = await User.findById({userId})
+        const userData = await User.findById(userId)
         const courseData = await Course.findById(courseId)
 
         if (!userData || !courseData) {
@@ -88,7 +88,7 @@ export const PurchaseCourse = async (req, res) => {
         const newPurchase = await Purchase.create(purchaseData)
 
         //stripe gateway initialize
-        const stripInstance = new Stripe(process.env.STRIPE_SECRET_KEY)
+        const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY)
         const currency = process.env.CURRENCY.toLowerCase()
 
           // Create Stripe session
