@@ -101,7 +101,7 @@ export const PurchaseCourse = async (req, res) => {
                         name: courseData.courseTitle,
                         images: [courseData.courseThumbnail],
                     },
-                    unit_amount: Math.round(amount * 100),
+                    unit_amount: Math.round(purchaseData.amount * 100),
                 },
                 quantity: 1,
             }],
