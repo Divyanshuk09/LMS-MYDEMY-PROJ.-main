@@ -69,7 +69,7 @@ export const PurchaseCourse = async (req, res) => {
         if (!courseId) {
             return res.status(400).json({success:false,message:'Course Id is required'})
         }
-        const userData = await User.findById(userId)
+        const userData = await User.findById({userId})
         const courseData = await Course.findById(courseId)
 
         if (!userData || !courseData) {
@@ -81,7 +81,7 @@ export const PurchaseCourse = async (req, res) => {
 
         const purchaseData = {
             courseId: courseData._id,
-            userId,
+            userId:userData._id,
             amount: Number((courseData.coursePrice - courseData.discount * courseData.coursePrice / 100).toFixed(2))
         }
 
