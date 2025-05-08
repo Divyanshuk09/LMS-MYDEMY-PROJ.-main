@@ -79,6 +79,13 @@ export const PurchaseCourse = async (req, res) => {
             })
         }
 
+        if(courseData.educator === userData._id){
+            return res.status(400).json({
+                success:false,
+                message:"You cant purchase your own course."
+            })
+        }
+
         const purchaseData = {
             courseId: courseData._id,
             userId:userData._id,

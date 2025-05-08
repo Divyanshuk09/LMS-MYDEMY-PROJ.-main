@@ -53,7 +53,7 @@ const Player = () => {
       );
       if (data.success) {
         toast.success(data.message);
-        getCourseProgress()
+        getCourseProgress();
       } else {
         toast.error(data.message);
       }
@@ -71,7 +71,7 @@ const Player = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (data.success) {
-        setProgressData(data.progressData)
+        setProgressData(data.progressData);
       } else {
         toast.error(data.message);
       }
@@ -88,21 +88,20 @@ const Player = () => {
         { courseId, rating },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-        console.log("Daata:",data);
       if (data.success) {
-        setInitialRating(data.rating)
+        setInitialRating(data.rating);
         toast.success(data.message);
-        fetchUserEnrolledCourses()
+        fetchUserEnrolledCourses();
       } else {
         toast.error(data.message);
       }
     } catch (error) {
       toast.error(error.message);
     }
-  }
+  };
 
   useEffect(() => {
-    getCourseProgress()
+    getCourseProgress();
   }, []);
 
   useEffect(() => {
@@ -126,9 +125,9 @@ const Player = () => {
 
   return courseData ? (
     <>
-      <div className="p-4 sm:p-10 flex flex-col-reverse md:grid md:grid-cols-2 gap-10 md:px-36">
-        {/* left column */}
-        <div className="text-gray-800">
+      <div className="flex flex-col-reverse lg:flex-row gap-6 lg:gap-10 px-4 pt-2 lg:px-6 lg:pt-4 relative">
+      {/* left column */}
+      <div className="w-full lg:w-3/5 text-gray-600">
           <h2 className="text-xl font-semibold">Course Structure</h2>
           <div className="pt-5">
             {courseData &&
@@ -161,8 +160,11 @@ const Player = () => {
                       <ul className="list-disc md:pl-10 pl-4 pr-4 py-2 text-gray-600 border-l border-r border-b border-gray-300">
                         {chapter.chapterContent.map((lecture, i) => (
                           <li key={i} className="flex items-center gap-2 py-1">
-                            {progressData && progressData.lectureCompleted.includes(lecture.lectureId) ? (
-                              <FaCheckCircle className="text-blue-500"/>
+                            {progressData &&
+                            progressData.lectureCompleted.includes(
+                              lecture.lectureId
+                            ) ? (
+                              <FaCheckCircle className="text-blue-500" />
                             ) : (
                               <MdPlayCircle className="text-blue-500" />
                             )}
@@ -219,7 +221,13 @@ const Player = () => {
           </div>
         </div>
         {/* right column  */}
-        <div className="md:mt-10">
+        <div
+          className={`w-full lg:w-2/5 shadow-xl  z-10 rounded overflow-hidden  ${
+            isDark
+              ? "bg-gray-50/10 text-white shadow-gray-800"
+              : "bg-white text-gray-500 shadow-gray-300"
+          } `}
+        >
           {playerData ? (
             <div className="relative">
               <span
@@ -246,7 +254,10 @@ const Player = () => {
                   className="text-blue-600 hover:underline cursor-pointer"
                   onClick={() => markLectureAsCompleted(playerData.lectureId)}
                 >
-                  {progressData && progressData.lectureCompleted.includes(playerData.lectureId) ? "Completed" : "Mark as Completed"}
+                  {progressData &&
+                  progressData.lectureCompleted.includes(playerData.lectureId)
+                    ? "Completed"
+                    : "Mark as Completed"}
                 </button>
               </div>
             </div>

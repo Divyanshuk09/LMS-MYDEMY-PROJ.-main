@@ -5,8 +5,10 @@ import { Line } from "rc-progress";
 import Footer from "../../Components/Student/Footer";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useTheme } from "../../Context/ThemeContext";
 
 const MyEnrollments = () => {
+  const { isDark } = useTheme();
   const {
     enrolledcourses,
     fetchUserEnrolledCourses,
@@ -25,13 +27,11 @@ const MyEnrollments = () => {
       const token = await getToken();
       const tempProgressArray = await Promise.all(
         enrolledcourses.map(async (course) => {
-          console.log("course:", course._id);
           const { data } = await axios.post(
             `${backendUrl}/api/user/get-course-progress`,
             { courseId: course._id },
             { headers: { Authorization: `Bearer ${token}` } }
           );
-          console.log(data);
           let totalLectures = calculateNoOfLectures(course);
           const lectureCompleted = data.progressData
             ? data.progressData.lectureCompleted.length
@@ -59,27 +59,40 @@ const MyEnrollments = () => {
 
   return (
     <>
-      <div className="md:px-36 px-2 pt-10">
+      <div
+        className={`min-bh-screen md:px-36 px-2 pt-10 ${
+          isDark ? "bg-gray-900 text-white" : "bg-white text-black"
+        }`}
+      >
         <h1 className="text-2xl font-semibold">My Enrollments</h1>
-        <table className="md:table-auto table-fixed w-full overflow-auto border border-gray-500/70 mt-10">
-          <thead className="text-gray-900 border-b border-gray-500/20 text-sm text-left">
+        <table
+          className={`md:table-auto table-fixed w-full overflow-auto border mt-10 ${
+            isDark ? "border-gray-700" : "border-gray-500/70"
+          }`}
+        >
+          <thead
+            className={`text-sm text-left ${
+              isDark
+                ? "text-gray-200 border-gray-600"
+                : "text-gray-900 border-gray-500/20"
+            } border-b`}
+          >
             <tr>
-              <th className="px-4 py-3 font font-semibold truncate">Course</th>
-              <th className="px-4 py-3 font font-semibold truncate max-sm:hidden">
+              <th className="px-4 py-3 font-semibold truncate">Course</th>
+              <th className="px-4 py-3 font-semibold truncate max-sm:hidden">
                 Duration
               </th>
-              <th className="px-4 py-3 font font-semibold truncate max-sm:hidden">
+              <th className="px-4 py-3 font-semibold truncate max-sm:hidden">
                 Completed
               </th>
-              <th className="px-4 py-3 font font-semibold truncate max-sm:text-right">
+              <th className="px-4 py-3 font-semibold truncate max-sm:text-right">
                 Status
               </th>
             </tr>
           </thead>
-          <tbody className="text-gray-700">
+          <tbody className={`${isDark ? "text-gray-100" : "text-gray-700"}`}>
             {enrolledcourses.map((course, index) => {
               const progress = progressArray[index];
-              console.log("progress:", progress);
               const isCompleted =
                 progress &&
                 progress.lectureCompleted / progress.totalLectures === 1;
@@ -87,7 +100,12 @@ const MyEnrollments = () => {
               const buttonColor = isCompleted ? "bg-red-600" : "bg-green-600";
 
               return (
-                <tr key={index} className="border-gray-500/20 border-b ">
+                <tr
+                  key={index}
+                  className={`border-b ${
+                    isDark ? "border-gray-700" : "border-gray-500/20"
+                  }`}
+                >
                   <td className="md:px-4 pl-2 md:pl-4 py-3 flex max-sm:flex-col max-sm:items-start items-center space-x-3">
                     <img
                       src={course.courseThumbnail}
@@ -107,7 +125,9 @@ const MyEnrollments = () => {
                               progress.totalLectures
                             : 0
                         }
-                      />{" "}
+                        strokeColor={isDark ? "#3b82f6" : "#22c55e"}
+                        trailColor={isDark ? "#1f2937" : "#d1d5db"}
+                      />
                     </div>
                   </td>
                   <td className="px-4 py-3 max-sm:hidden">
@@ -121,7 +141,7 @@ const MyEnrollments = () => {
                   <td className="px-4 py-3 max-sm:text-right">
                     <button
                       onClick={() => navigate("/player/" + course._id)}
-                      className={` cursor-pointer px-3 sm:px-5 py-1.5 sm:py-2  max-sm:text-xs text-white rounded ${buttonColor}`}
+                      className={`cursor-pointer px-3 sm:px-5 py-1.5 sm:py-2 max-sm:text-xs text-white rounded ${buttonColor}`}
                     >
                       {buttonText}
                     </button>
@@ -132,7 +152,7 @@ const MyEnrollments = () => {
           </tbody>
         </table>
       </div>
-      <Footer/>
+      <Footer />
     </>
   );
 };

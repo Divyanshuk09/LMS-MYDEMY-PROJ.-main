@@ -3,21 +3,27 @@ import { AppContext } from "../../Context/AppContext";
 import Loading from "../../Components/Student/Loading";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { useTheme } from "../../Context/ThemeContext";
 
 const MyCourses = () => {
   const { currency, backendUrl, getToken, isEducator } = useContext(AppContext);
   const [courses, setCourses] = useState(null);
-
+  const { isDark } = useTheme();
+  const navigate = useNavigate();
   const fetchEducatorCourses = async () => {
     try {
       const token = await getToken();
-      const { data } = await axios.get(backendUrl + '/api/educator/my-courses', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const { data } = await axios.get(
+        backendUrl + "/api/educator/my-courses",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       if (data.success) {
-        setCourses(data.courses)
-      }else{
-        toast.error(data.message)
+        setCourses(data.courses);
+      } else {
+        toast.error(data.message);
       }
     } catch (error) {
       toast.error(error.message);
@@ -32,12 +38,28 @@ const MyCourses = () => {
 
   return courses ? (
     <>
-      <div className="h-fit flex flex-col items-start justify-between md:p-8 md:pb-0 p-0 md:pt-8 pt-0 pb-0">
+      <div className="h-fit flex flex-col items-start justify-between md:p-8 md:pb-0 p-0 md:pt-2 pt-0 pb-0">
         <div className="w-full">
-          <h2 className="text-lg font-medium pb-4">My Courses</h2>
+          <h2
+            className={`${
+              isDark ? "text-gray-300" : "text-black"
+            } text-lg font-medium pb-4`}
+          >
+            My Courses
+          </h2>
           <div className="relative overflow-x-scroll">
-            <table className="w-full text-sm text-left rtl:text-right text-gray-500">
-              <thead className="text-xs text-gray-700 uppercase bg-gray-200 ">
+            <table
+              className={`w-full text-sm text-left rtl:text-right ${
+                isDark ? "text-gray-300" : "text-gray-500"
+              } `}
+            >
+              <thead
+                className={`text-xs ${
+                  isDark
+                    ? "bg-gray-700 text-gray-300"
+                    : "text-gray-700 bg-gray-200"
+                } uppercase `}
+              >
                 <tr>
                   <th scope="col" className="px-6 py-3">
                     All Courses
@@ -57,7 +79,14 @@ const MyCourses = () => {
                 {courses.map((course) => (
                   <tr
                     key={course._id}
-                    className="border-b text-gray-500 border-gray-500/40 "
+                    onClick={() =>
+                      navigate(`/educator/my-courses/${course._id}`)
+                    }
+                    className={`border-b ${
+                      isDark
+                        ? "hover:bg-gray-600/20"
+                        : "text-gray-500 border-gray-500/40 hover:bg-gray-200"
+                    }  cursor-pointer`}
                   >
                     <th
                       scope="row"
@@ -68,10 +97,20 @@ const MyCourses = () => {
                         alt="course Image"
                         className="w-16"
                       />
-                      <span className="truncate ">{course.courseTitle}</span>
+                      <span
+                        className={`px-6 py-4 ${
+                          isDark ? "text-gray-300" : "text-gray-900"
+                        } truncate`}
+                      >
+                        {course.courseTitle}
+                      </span>
                     </th>
 
-                    <td className="px-6 py-4 text-gray-900">
+                    <td
+                      className={`px-6 py-4 ${
+                        isDark ? "text-gray-300" : "text-gray-900"
+                      }`}
+                    >
                       {currency}{" "}
                       {Math.floor(
                         // Earnings = Total Students × (Original Price - (Discount % × Original Price)/ 100)
@@ -81,10 +120,18 @@ const MyCourses = () => {
                       )}
                     </td>
 
-                    <td className="px-6 py-4 text-gray-900">
+                    <td
+                      className={`px-6 py-4 ${
+                        isDark ? "text-gray-300" : "text-gray-900"
+                      }`}
+                    >
                       {course.enrolledStudents.length}
                     </td>
-                    <td className="px-6 py-4 text-gray-900">
+                    <td
+                      className={`px-6 py-4 ${
+                        isDark ? "text-gray-300" : "text-gray-900"
+                      }`}
+                    >
                       {new Date(course.createdAt).toLocaleDateString()}
                     </td>
                   </tr>

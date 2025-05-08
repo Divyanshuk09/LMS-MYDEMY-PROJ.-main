@@ -7,16 +7,18 @@ import { MdArrowDropDown, MdClose } from "react-icons/md";
 import { AppContext } from "../../Context/AppContext";
 import { toast } from "react-toastify";
 import axios from "axios";
+import { useTheme } from "../../Context/ThemeContext";
 
 const AddCourse = () => {
   const { backendUrl, getToken } = useContext(AppContext);
-
+  const { isDark } = useTheme();
   const quillRef = useRef(null);
   const editorRef = useRef(null);
 
   const [courseTitle, setCourseTitle] = useState("");
   const [description, setDescription] = useState("");
   const [coursePrice, setCoursePrice] = useState(0);
+  const [buttonText, setButtonText] = useState("Add");
   const [discount, setDiscount] = useState(0);
   const [image, setImage] = useState(null);
   const [chapters, setChapters] = useState([]);
@@ -90,7 +92,7 @@ const AddCourse = () => {
           };
           return {
             ...chapter,
-            chapterContent: [...chapter.chapterContent, newLecture]
+            chapterContent: [...chapter.chapterContent, newLecture],
           };
         }
         return chapter;
@@ -108,6 +110,8 @@ const AddCourse = () => {
   const handleSubmit = async (e) => {
     try {
       e.preventDefault();
+
+      setButtonText("Adding...");
       if (!image) {
         toast.error("Thumbnail Image is required!");
         return;
@@ -119,13 +123,10 @@ const AddCourse = () => {
         discount: Number(discount),
         courseContent: chapters,
       };
-      console.log("courseData:",courseData);
 
       const formData = new FormData();
       formData.append("courseData", JSON.stringify(courseData));
       formData.append("image", image);
-
-      console.log("formData:",formData);
 
       const token = await getToken();
       const { data } = await axios.post(
@@ -133,21 +134,19 @@ const AddCourse = () => {
         formData,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log("Data:::",data);
 
       if (data.success) {
         toast.success(data.message);
         setCoursePrice(0);
-        setCourseTitle('');
+        setCourseTitle("");
         setDiscount(0);
         setImage(null);
         setChapters([]);
-        quillRef.current.root.innerHTML = '';
+        quillRef.current.root.innerHTML = "";
       } else {
         toast.error(data.message);
       }
     } catch (error) {
-      console.log("error:", error);
       toast.error(error.message);
     }
   };
@@ -164,45 +163,65 @@ const AddCourse = () => {
 
   return (
     <>
-      <div className="h-fit overflow-scroll flex flex-col items-start justify-between md:p-8 mb:pb-0 md:pt-8 pb-0">
+      <div
+        className={`h-fit overflow-scroll flex flex-col items-start justify-between ${
+          isDark ? "text-white" : "text-black"
+        }`}
+      >
         <form
           onSubmit={handleSubmit}
           className="flex flex-col gap-4 max-w-md w-full text-gray-500"
         >
           <div className="flex flex-col gap-1">
-            <p>Course Title</p>
+            <p className={`${isDark ? "text-gray-200" : "text-black"}`}>
+              Course Title
+            </p>
             <input
               value={courseTitle}
               onChange={(e) => setCourseTitle(e.target.value)}
               type="text"
               placeholder="Text here"
-              className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500"
+              className={`outline-none md:py-2.5 py-2 px-3 rounded border ${
+                isDark
+                  ? "bg-gray-800/40 text-white border-gray-600"
+                  : "bg-white text-black border-gray-500"
+              }`}
               required
             />
           </div>
 
           <div className="flex flex-col gap-1">
-            <p>Course Description</p>
+            <p className={`${isDark ? "text-gray-200" : "text-black"}`}>
+              Course Description
+            </p>
             <div ref={editorRef}></div>
           </div>
 
           <div className="flex items-center justify-between flex-wrap">
             <div className="flex flex-col gap-1">
-              <p>Course Price</p>
+              <p className={`${isDark ? "text-gray-200" : "text-black"}`}>
+                Course Price
+              </p>
               <input
                 onChange={(e) => setCoursePrice(parseFloat(e.target.value))}
                 value={coursePrice}
                 type="number"
                 placeholder="0"
                 min={0}
-                className="outline-none md:py-2.5 py-2 w-28 px-3 rounded border border-gray-500"
+                className={`outline-none md:py-2.5 py-2 px-3 rounded border ${
+                  isDark
+                    ? "bg-gray-800/40 text-white border-gray-600"
+                    : "bg-white text-black border-gray-500"
+                }`}
                 required
               />
             </div>
           </div>
 
           <div className="flex md:flex-row flex-col md:items-center gap-3">
-            <p>Course Thumbnail :</p>
+            <p className={`${isDark ? "text-gray-200" : "text-black"}`}>
+              Course Thumbnail :
+            </p>
             <label htmlFor="thumbnailImage" className="flex items-center gap-3">
               <FaDropbox className="bg-blue-500 text-white text-2xl p-1 rounded cursor-pointer" />
               <input
@@ -212,16 +231,20 @@ const AddCourse = () => {
                 accept="image/*"
                 hidden
               />
-              <img
-                className="max-h-10"
-                src={image ? URL.createObjectURL(image) : " "}
-                alt=""
-              />
+              {image && (
+                <img
+                  className="max-h-10"
+                  src={URL.createObjectURL(image)}
+                  alt="thumbnail"
+                />
+              )}
             </label>
           </div>
 
           <div className="flex flex-col gap-1">
-            <p>Discount % </p>
+            <p className={`${isDark ? "text-gray-200" : "text-black"}`}>
+              Discount %{" "}
+            </p>
             <input
               onChange={(e) => setDiscount(e.target.value)}
               value={discount}
@@ -229,7 +252,11 @@ const AddCourse = () => {
               placeholder="0"
               min={0}
               max={100}
-              className="outline-none md:py-2.5 py-2 w-28 px-3 rounded border border-gray-500"
+              className={`outline-none md:py-2.5 py-2 px-3 rounded border ${
+                isDark
+                  ? "bg-gray-800/40 text-white border-gray-600"
+                  : "bg-white text-black border-gray-500"
+              }`}
               required
             />
           </div>
@@ -238,7 +265,11 @@ const AddCourse = () => {
             {chapters.map((chapter, chapterIndex) => (
               <div
                 key={chapterIndex}
-                className="bg-white border rounded-lg mb-4"
+                className={`${
+                  isDark
+                    ? "bg-gray-800/40 border-gray-700"
+                    : "bg-white border-gray-300"
+                } border rounded-lg mb-4`}
               >
                 <div className="flex justify-between items-center p-4 border-b">
                   <div className="flex items-center">
@@ -295,7 +326,11 @@ const AddCourse = () => {
 
                     <div
                       onClick={() => handleLecture("add", chapter.chapterId)}
-                      className="inline-flex bg-gray-100 p-2 rounded cursor-pointer mt-2"
+                      className={`inline-flex ${
+                        isDark
+                          ? "bg-gray-600/50 text-white"
+                          : "bg-gray-200 text-black"
+                      } p-2 rounded cursor-pointer mt-2`}
                     >
                       + Add Lecture
                     </div>
@@ -305,14 +340,22 @@ const AddCourse = () => {
             ))}
             <div
               onClick={() => handleChapter("add")}
-              className="flex justify-center items-center bg-blue-100 p-2 rounded-lg cursor-pointer"
+              className={`flex justify-center items-center ${
+                isDark ? "bg-blue-400 text-black" : "bg-blue-200 text-black"
+              } p-2 rounded-lg cursor-pointer`}
             >
               + Add Chapter
             </div>
 
             {showPopUp && (
-              <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-black/40">
-                <div className="bg-white text-gray-700 p-4 rounded relative w-full max-w-80 shadow-lg ">
+              <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-gray-900/40">
+                <div
+                  className={`${
+                    isDark
+                      ? "bg-white/10 text-gray-400"
+                      : "bg-white text-gray-700"
+                  }  p-4 rounded relative w-full max-w-80 shadow-lg `}
+                >
                   <h2 className="text-lg font-semibold mb-4">Add Lecture</h2>
                   <div className="mb-2">
                     <p>Lecture Title</p>
@@ -391,9 +434,15 @@ const AddCourse = () => {
           </div>
           <button
             type="submit"
-            className="bg-black text-white w-max py-2.5 px-8 cursor-pointer rounded-lg hover:bg-gray-700"
+            className={`${
+              isDark
+                ? "bg-white text-black hover:bg-gray-300"
+                : "bg-gray-900 text-white hover:bg-gray-700"
+            } w-max py-2.5 px-8 cursor-pointer rounded-lg `}
+            disabled={buttonText !== "Add"}
+            onChange={(e) => setButtonText(e.target.value)}
           >
-            ADD
+            {buttonText}
           </button>
         </form>
       </div>

@@ -2,23 +2,29 @@ import React, { useContext } from "react";
 import CourseCard from "./CourseCard";
 import { Link } from "react-router-dom";
 import { AppContext } from "../../Context/AppContext";
+import { useTheme } from "../../Context/ThemeContext";
 
 const CourseSection = () => {
   const { allcourses } = useContext(AppContext);
+  const { isDark } = useTheme();
 
   return (
     <>
       <div className="py-16 md:px-40 px-8">
-        <h1 className="md:text-3xl text-lg  font-medium text-gray-800">
+        <h1
+          className={`md:text-3xl text-lg  font-medium ${
+            isDark ? "text-white" : "text-gray-800"
+          }`}
+        >
           Learn from the best
         </h1>
-        <p className="text-sm  md:text-base text-gray-500 mt-3">
+        <p className="text-sm  md:text-lg text-gray-500 mt-3">
           Discover our top-rated courses across various categories. From coding
           and design to business <br /> and wellness, our couses are crafted to
           deliver
         </p>
 
-        <div className="grid grid-cols-[repeat(auto-fit,_minmax(200px,_1fr))] px-4 md:px-0 md:my-16 my-10 gap-4">
+        <div className="grid gap-4 px-4 md:px-0 md:my-16 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           {allcourses.slice(0, 4).map((course, index) => (
             <CourseCard key={index} course={course} />
           ))}
@@ -27,7 +33,11 @@ const CourseSection = () => {
         <Link
           to={"/course-list"}
           onClick={() => scrollTo(0, 0)}
-          className="text-gray-500 border border-gray-500/30 px-10 py-3 rounded"
+          className={`${
+            isDark
+              ? "text-white border-gray-500"
+              : "text-gray-500 border-gray-500/30"
+          } border  px-10 py-3 rounded`}
         >
           Show all courses
         </Link>

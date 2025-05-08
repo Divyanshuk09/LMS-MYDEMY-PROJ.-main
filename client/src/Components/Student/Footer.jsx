@@ -9,7 +9,11 @@ const Footer = () => {
         {/* Logo & Description */}
         <div className="w-full flex md:items-start items-center flex-col ">
           <Link to="/" className="flex items-center gap-2">
-            <img src={logo} alt="Logo" className="h-8 w-8 bg-[#89898991] rounded-full" />
+            <img
+              src={logo}
+              alt="Logo"
+              className="h-8 w-8 bg-[#89898991] rounded-full"
+            />
             <span className="text-white text-lg font-bold">MyDemy</span>
           </Link>
 
@@ -25,10 +29,18 @@ const Footer = () => {
         <div className="flex flex-col md:items-start items-center w-full">
           <h2 className="text-white mb-5 font-semibold">Company</h2>
           <ul className="flex  md:flex-col w-full justify-between md:text-sm text-xs text-white/80 md:space-y-2">
-            <Link to="/" className="hover:underline">Home</Link>
-            <Link to="/" className="hover:underline">About us</Link>
-            <Link to="/" className="hover:underline">Contact us</Link>
-            <Link to="/" className="hover:underline">Privacy policy</Link>
+            <Link to="/" className="hover:underline">
+              Home
+            </Link>
+            <Link to="/" className="hover:underline">
+              About us
+            </Link>
+            <Link to="/" className="hover:underline">
+              Contact us
+            </Link>
+            <Link to="/" className="hover:underline">
+              Privacy policy
+            </Link>
           </ul>
         </div>
 

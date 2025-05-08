@@ -11,8 +11,10 @@ import { toast } from "react-toastify";
 export const AppContext = createContext();
 
 export const AppContextProvider = (props) => {
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'https://lms-mydemy-proj-main.onrender.com';
-  
+  const backendUrl =
+    import.meta.env.VITE_BACKEND_URL ||
+    "https://lms-mydemy-proj-main.onrender.com";
+
   const currency = import.meta.env.VITE_CURRENCY;
   const navigate = useNavigate();
 
@@ -32,10 +34,10 @@ export const AppContextProvider = (props) => {
 
     try {
       const token = await getToken();
-      // console.log(token);
-      const  {data}  = await axios.get(backendUrl + "/api/user/user-data", {headers: { Authorization: `Bearer ${token}` }});
-      console.log(data);
-      
+      const { data } = await axios.get(backendUrl + "/api/user/user-data", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
       if (data.success) {
         setUserData(data.user);
       } else {
@@ -132,15 +134,15 @@ export const AppContextProvider = (props) => {
     fetchallcourses();
   }, []);
 
-  const logToken = async () => {
-    console.log(await getToken());
-  };
+  // const logToken = async () => {
+  //   console.log(await getToken());
+  // };
 
   useEffect(() => {
     if (user) {
       fetchUserData();
       fetchUserEnrolledCourses();
-      logToken();
+      // logToken();
     }
   }, [user]);
 

@@ -5,12 +5,13 @@ import CourseCard from "../../Components/Student/CourseCard";
 import { AppContext } from "../../Context/AppContext";
 import SearchBar from "../../Components/Student/SearchBar";
 import { MdCancel } from "react-icons/md";
+import { useTheme } from "../../Context/ThemeContext";
 
 const CourseList = ({ data }) => {
   const navigate = useNavigate();
   const { allcourses } = useContext(AppContext);
+  const { isDark } = useTheme();
   const { input } = useParams();
-  // console.log(allcourses);
   const [filteredCourse, setFilteredCourse] = useState([]);
 
   useEffect(() => {
@@ -32,21 +33,36 @@ const CourseList = ({ data }) => {
       <div className="relative md:px-36 sm:px-12 md:pt-20 pt-5 text-left">
         <div className="flex md:flex-row flex-col gap-6 items-start px-4 md:px-0 justify-between w-full">
           <div>
-            <h1 className="md:text-4xl text-2xl font-semibold ">Course List</h1>
+            <h1
+              className={`md:text-4xl text-2xl font-semibold ${
+                isDark ? "text-white" : "text-black"
+              }`}
+            >
+              Course List
+            </h1>
             <p className="text-gray-500">
               <span onClick={() => navigate("/")} className="text-blue-500">
                 Home
               </span>
               {" / "}
-              <span>Course List</span>
+              <span className={`${isDark ? "text-white" : "text-black"}`}>
+                Course List
+              </span>
             </p>
           </div>
           <SearchBar data={input} />
         </div>
         {input && (
-          <div className="inline-flex items-center gap-4 px-4 ml-4 md:ml-0 mt-2 md:py-2 border md:mt-8 md:-mb-8 text-gray-800">
+          <div
+            className={`inline-flex items-center gap-4 px-4 ml-4 md:ml-0 mt-2 md:py-2 border md:mt-8 md:-mb-8 ${
+              isDark ? "text-gray-400" : "text-gray-800"
+            } `}
+          >
             <p>{input}</p>
-            <span onClick={() => navigate("/course-list")} className="cursor-pointer">
+            <span
+              onClick={() => navigate("/course-list")}
+              className="cursor-pointer"
+            >
               <MdCancel />
             </span>
           </div>
@@ -57,7 +73,6 @@ const CourseList = ({ data }) => {
               <CourseCard key={index} course={course} />
             ))}
           </div>
-
         </div>
       </div>
       <Footer />

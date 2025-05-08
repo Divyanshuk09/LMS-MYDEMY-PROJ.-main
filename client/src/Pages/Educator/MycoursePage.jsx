@@ -1,5 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-toastify";
 import { AppContext } from "../../Context/AppContext";
 import Loading from "../../Components/Student/Loading";
 import { MdClose, MdPlayCircle } from "react-icons/md";
@@ -9,12 +11,9 @@ import { GiOpenBook } from "react-icons/gi";
 import YouTube from "react-youtube";
 import Footer from "../../Components/Student/Footer";
 import humanizeDuration from "humanize-duration";
-import axios from "axios";
-import { toast } from "react-toastify";
 import { useTheme } from "../../Context/ThemeContext";
 
-const CourseDetails = () => {
-  const { isDark } = useTheme();
+const MycoursePage = () => {
   const {
     currency,
     allcourses,
@@ -32,6 +31,9 @@ const CourseDetails = () => {
   const [expandedChapters, setExpandedChapters] = useState({});
   const [isAlreadyEnrolled, setIsAlreadyEnrolled] = useState(false);
   const [playerData, setPlayerData] = useState(null);
+
+  const { isDark } = useTheme();
+
   async function fetchCourseData() {
     try {
       const { data } = await axios.get(backendUrl + "/api/course/" + id);
@@ -45,44 +47,6 @@ const CourseDetails = () => {
     }
   }
 
-  const enrollCourse = async () => {
-    try {
-      if (!userData) {
-        return toast.warn("Login to Enroll.");
-      }
-      if (isAlreadyEnrolled) {
-        return toast.warn("Already Enrolled");
-      }
-      if (userData._id === courseData.educator._id) {
-        return toast.warn("You cant purchase your own course");
-      }
-      const token = await getToken();
-
-      const { data } = await axios.post(
-        backendUrl + "/api/user/purchase",
-        { courseId: courseData._id },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      // if (userData.user) {
-
-      // }
-      if (data.success) {
-        const { session_url } = data;
-        window.location.replace(session_url);
-      } else {
-        toast.error(data.message);
-      }
-    } catch (error) {
-      toast.error(error.message);
-    }
-  };
-
-  useEffect(() => {
-    if (userData && courseData) {
-      setIsAlreadyEnrolled(userData.enrolledCourses.includes(courseData._id));
-    }
-  }, [userData, courseData]);
-
   useEffect(() => {
     fetchCourseData();
   }, []);
@@ -93,10 +57,9 @@ const CourseDetails = () => {
       [index]: !prev[index],
     }));
   };
-
   return courseData ? (
     <>
-      <div className="flex flex-col-reverse lg:flex-row gap-10 lg:gap-10 px-4 pt-2 lg:px-28 md:px-24 lg:pt-20 relative ">
+      <div className="flex flex-col-reverse lg:flex-row gap-6 lg:gap-10 px-4 pt-2 lg:px-6 lg:pt-4 relative">
         {/* Left Content */}
         <div className="w-full lg:w-3/5 text-gray-600">
           <h1
@@ -136,10 +99,9 @@ const CourseDetails = () => {
             </p>
           </div>
 
-          {/* Educator */}
-          <p className="text-xs md:text-sm mt-2">
+          <p className="text-sm mb-4">
             Course by:{" "}
-            <span className="text-blue-500 underline">
+            <span className="text-blue-600 underline">
               {courseData?.educator?.name}
             </span>
           </p>
@@ -196,14 +158,14 @@ const CourseDetails = () => {
                         </div>
                         <div className="flex items-center gap-2">
                           <button
-                            className="text-xs text-blue-600 hover:underline cursor-pointer "
+                            className="text-xs text-blue-600 hover:underline cursor-pointer"
                             onClick={() =>
                               setPlayerData({
                                 videoId: lecture.lectureUrl.split("/").pop(),
                               })
                             }
                           >
-                            {lecture.isPreviewFree ? "preview" : ""}
+                            Watch
                           </button>
                           <p className="text-xs text-gray-500">
                             {humanizeDuration(
@@ -219,6 +181,7 @@ const CourseDetails = () => {
               </div>
             ))}
           </div>
+
           {/* Full Description */}
           <h2
             className={`text-lg sm:text-xl font-semibold mt-6 ${
@@ -237,7 +200,7 @@ const CourseDetails = () => {
           />
         </div>
 
-        {/* Right Column */}
+        {/* Right Sidebar */}
         <div
           className={`w-full lg:w-2/5 shadow-xl  z-10 rounded overflow-hidden  ${
             isDark
@@ -319,14 +282,6 @@ const CourseDetails = () => {
               </div>
             </div>
 
-            <button
-              onClick={enrollCourse}
-              className={` mt-2 bg-blue-600 md:text-base text-sm font-mono text-white w-full py-3 rounded font-semibold transition-transform duration-200 ease-in-out hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 hover:bg-blue-500 cursor-pointer`}
-              disabled={isAlreadyEnrolled}
-            >
-              {isAlreadyEnrolled ? "Already Enrolled" : "Enroll Now"}
-            </button>
-
             <div className="mt-4">
               <h1
                 className={`${
@@ -346,12 +301,10 @@ const CourseDetails = () => {
           </div>
         </div>
       </div>
-
-      <Footer />
     </>
   ) : (
     <Loading />
   );
 };
 
-export default CourseDetails;
+export default MycoursePage;

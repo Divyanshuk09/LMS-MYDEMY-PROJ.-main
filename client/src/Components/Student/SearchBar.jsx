@@ -2,18 +2,21 @@ import React from "react";
 import { useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-const SearchBar = ({data}) => {
+const SearchBar = ({ data }) => {
   const navigate = useNavigate();
   const [coursename, setCoursename] = useState(data ? data : "");
-  
-  const onSearchHandler = (e)=>{
+
+  const onSearchHandler = (e) => {
     e.preventDefault();
-    navigate('/course-list/'+ coursename)
-  }
+    navigate("/course-list/" + coursename);
+  };
 
   return (
     <>
-      <form onSubmit={onSearchHandler} className="max-w-xl w-full md:h-14 h-12 bg-white rounded-lg border border-gray-500/20 flex items-center ">
+      <form
+        onSubmit={onSearchHandler}
+        className="max-w-xl w-full md:h-14 h-12 bg-white rounded-lg border border-gray-500/20 flex items-center "
+      >
         <div className="md:w-auto w-10 px-3">
           <FaSearch />
         </div>
