@@ -11,8 +11,10 @@ import Rating from "../../Components/Student/Rating";
 import Footer from "../../Components/Student/Footer";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useTheme } from "../../Context/ThemeContext";
 
 const Player = () => {
+  const { isDark } = useTheme();
   const {
     enrolledcourses,
     calculateChapterTime,
@@ -125,10 +127,14 @@ const Player = () => {
 
   return courseData ? (
     <>
-      <div className="flex flex-col-reverse lg:flex-row gap-6 lg:gap-10 px-4 pt-2 lg:px-6 lg:pt-4 relative">
-      {/* left column */}
-      <div className="w-full lg:w-3/5 text-gray-600">
-          <h2 className="text-xl font-semibold">Course Structure</h2>
+      <div className="flex flex-col-reverse lg:flex-row gap-6 lg:gap-10 px-4 pt-2 lg:px-36 lg:pt-10 relative">
+        {/* left column */}
+        <div
+          className={`w-full lg:w-3/5 ${
+            isDark ? "text-gray-200" : "text-gray-600"
+          }`}
+        >
+          <h2 className="md:text-2xl text-xl font-semibold">Course Structure :</h2>
           <div className="pt-5">
             {courseData &&
               courseData?.courseContent?.map((chapter, index) => (
@@ -136,7 +142,9 @@ const Player = () => {
                   {/* Chapter Header */}
                   <div
                     onClick={() => toggleChapter(index)}
-                    className="flex items-center cursor-pointer justify-between border transition-all duration-100 border-gray-500/60 px-2 py-2 bg-gray-100"
+                    className={`flex items-center cursor-pointer justify-between border transition-all duration-100 border-gray-500/60 px-2 py-2 ${
+                      isDark ? "bg-gray-800" : "bg-gray-100"
+                    } `}
                   >
                     <div className="flex items-center gap-2">
                       <IoIosArrowDown
@@ -144,7 +152,11 @@ const Player = () => {
                           expandedChapters[index] ? "rotate-180" : ""
                         }`}
                       />
-                      <p className="text-gray-800 font-semibold text-xs md:text-base">
+                      <p
+                        className={`${
+                          isDark ? "text-gray-200" : "text-gray-800"
+                        } font-semibold text-xs md:text-base`}
+                      >
                         {chapter.chapterTitle}
                       </p>
                     </div>
@@ -157,7 +169,7 @@ const Player = () => {
                   {/* Lecture List */}
                   {expandedChapters[index] && (
                     <div className="overflow-hidden transition-all duration-300 max-h-96">
-                      <ul className="list-disc md:pl-10 pl-4 pr-4 py-2 text-gray-600 border-l border-r border-b border-gray-300">
+                      <ul className="list-disc md:pl-2 pl-2 pr-4 py-2 text-gray-600 border-l border-r border-b border-gray-300">
                         {chapter.chapterContent.map((lecture, i) => (
                           <li key={i} className="flex items-center gap-2 py-1">
                             {progressData &&
@@ -168,7 +180,7 @@ const Player = () => {
                             ) : (
                               <MdPlayCircle className="text-blue-500" />
                             )}
-                            <div className="flex items-center justify-between w-full text-gray-800 text-xs md:text-default">
+                            <div className={`flex items-center justify-between w-full ${isDark?"text-gray-400":"text-gray-800"}  text-xs md:text-default`}>
                               <p className="text-xs md:text-sm">
                                 {lecture.lectureTitle}
                               </p>
@@ -204,25 +216,28 @@ const Player = () => {
               ))}
           </div>
           {/* courseDescription */}
-          <div className="pt-4 pb-10 text-gray-600">
-            <h1 className="text-gray-800 text-2xl mt-4 md:text-3xl font-semibold">
+          <div className={`pt-4 pb-10 ${isDark?"text-gray-500":"text-gray-600"}`}>
+            <h1 className={`${isDark?"text-gray-400":"text-gray-800"} text-2xl mt-4 md:text-3xl font-semibold`}>
               Course Description :
             </h1>
             <p
-              dangerouslySetInnerHTML={{
-                __html: courseData?.courseDescription?.slice(0, 200) || "",
-              }}
-            ></p>
+            className={`text-lg  sm:text-base mb-3 ${
+              isDark ? "text-gray-300" : "text-gray-600"
+            }`}
+            dangerouslySetInnerHTML={{
+              __html: courseData?.courseDescription.slice(0, 200),
+            }}
+          />
           </div>
 
           <div className="flex items-center gap-2 py-3 mt-10">
-            <h1 className="text-xl font-bold">Rate this course:</h1>
+            <h1 className={`text-xl font-bold ${isDark?"text-gray-500":"text-gray-800"}`}>Rate this course:</h1>
             <Rating initialRating={initialRating} onRate={handleRating} />
           </div>
         </div>
         {/* right column  */}
         <div
-          className={`w-full lg:w-2/5 shadow-xl  z-10 rounded overflow-hidden  ${
+          className={`w-full lg:max-w-2/5 h-fit shadow-xl z-10 rounded overflow-hidden  ${
             isDark
               ? "bg-gray-50/10 text-white shadow-gray-800"
               : "bg-white text-gray-500 shadow-gray-300"
@@ -245,7 +260,7 @@ const Player = () => {
                 }}
                 iframeClassName="w-full aspect-video"
               />
-              <div className="flex justify-between items-center mt-2">
+              <div className="flex justify-between items-center mt-4 px-2">
                 <p className="font-bold">
                   {playerData.chapter}.{playerData.lecture}{" "}
                   {playerData.lectureTitle}

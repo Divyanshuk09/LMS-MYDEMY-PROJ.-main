@@ -128,7 +128,11 @@ const Navbar = () => {
         </div>
 
         {/* Mobile View */}
-        <div className="md:hidden flex items-center gap-2 sm:gap-5 text-gray-700">
+        <div
+          className={`md:hidden flex items-center gap-2 sm:gap-5  ${
+            isDark ? "text-gray-300" : "text-gray-700"
+          }`}
+        >
           {user && (
             <div className="text-sm flex gap-2">
               <button

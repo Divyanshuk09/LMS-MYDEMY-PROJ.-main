@@ -100,14 +100,14 @@ const CourseDetails = () => {
         {/* Left Content */}
         <div className="w-full lg:w-3/5 text-gray-600">
           <h1
-            className={`text-xl sm:text-2xl lg:text-3xl font-semibold ${
+            className={`md:text-3xl lg:text-4xl sm:text-2xl font-semibold ${
               isDark ? "text-gray-200" : "text-gray-900"
             } mb-2`}
           >
             {courseData?.courseTitle}
           </h1>
           <p
-            className={`text-sm sm:text-base mb-3 ${
+            className={`text-lg  sm:text-base mb-3 ${
               isDark ? "text-gray-300" : "text-gray-600"
             }`}
             dangerouslySetInnerHTML={{
@@ -146,9 +146,9 @@ const CourseDetails = () => {
 
           {/* Course Structure */}
           <h2
-            className={`text-lg sm:text-xl font-semibold ${
+            className={`text-lg md:text-2xl sm:text-xl font-semibold ${
               isDark ? "text-gray-300" : "text-gray-800"
-            } mb-2`}
+            } mt-6 mb-2`}
           >
             Course Structure
           </h2>
@@ -221,7 +221,7 @@ const CourseDetails = () => {
           </div>
           {/* Full Description */}
           <h2
-            className={`text-lg sm:text-xl font-semibold mt-6 ${
+            className={`text-lg md:text-2xl sm:text-xl font-semibold mt-6 ${
               isDark ? "text-gray-200" : "text-gray-800"
             } `}
           >
@@ -239,7 +239,7 @@ const CourseDetails = () => {
 
         {/* Right Column */}
         <div
-          className={`w-full lg:w-2/5 shadow-xl  z-10 rounded overflow-hidden  ${
+          className={`w-full lg:w-2/6 h-fit shadow-xl  z-10 rounded overflow-hidden  ${
             isDark
               ? "bg-gray-50/10 text-white shadow-gray-800"
               : "bg-white text-gray-500 shadow-gray-300"

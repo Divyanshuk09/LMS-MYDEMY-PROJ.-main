@@ -67,7 +67,7 @@ const Dashboard = () => {
             <img
               src={item.icon}
               alt=""
-              className="md:w-10 md:h-10 h-8 w-8 bg-gray-100 rounded"
+              className="md:w-10 md:h-10 h-8 w-8 rounded"
             />
             <div className="flex flex-col">
               <p className="text-2xl font-medium">{item.value}</p>
