@@ -12,7 +12,7 @@ const app = express()
 //middleware
 app.use(cors())
 app.use(clerkMiddleware())
-
+app.use(express.json())
 //db function
 await connectDB()
 

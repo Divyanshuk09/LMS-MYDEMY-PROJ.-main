@@ -35,17 +35,12 @@ export const addCourse = async (req, res) => {
         const imageFile = req.file;
         const educatorId = req.auth.userId;
 
-        console.log("courseData:",courseData);
-        console.log("imaeFIle:",imageFile);
-        console.log("educator:",educatorId)
-
         if (!imageFile) {
             return res.json({
                 success: false,
                 message: 'Thumbnail Not Attached'
             })
         }
-
         let parsedCourseData;
         try {
             parsedCourseData = JSON.parse(courseData);
@@ -55,7 +50,6 @@ export const addCourse = async (req, res) => {
                 message: 'Invalid courseData format'
             });
         }
-        console.log("paresedData:",parsedCourseData);
         // Upload image to Cloudinary
         const result = await cloudinary.uploader.upload(imageFile.path);
 
@@ -77,6 +71,53 @@ export const addCourse = async (req, res) => {
         });
     }
 }
+
+//delete the course
+
+export const deleteCourse = async (req, res) => {
+    try {
+        const { courseId } = req.body;
+
+        // Find the course by its ID
+        const course = await Course.findById(courseId);
+
+        if (!course) {
+            return res.status(404).json({
+                success: false,
+                message: "Course not found"
+            });
+        }
+
+        // Check if any students are enrolled
+        if (course.enrolledStudents.length >= 1) {
+            return res.status(409).json({
+                success: false,
+                message: "Student is enrolled.",
+            });
+        }
+
+        // Get publicId from course thumbnail for Cloudinary deletion
+        const publicId = course.courseThumbnail.split("/").pop().split('.')[0];
+
+        // Delete the image from Cloudinary
+        await cloudinary.uploader.destroy(publicId);
+
+        // Delete the course from the database
+        await Course.findByIdAndDelete(courseId);
+
+        // Respond with success message
+        res.status(200).json({
+            success: true,
+            message: "Course deleted successfully"
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
 
 // Get educator Courses
 export const educatorCourses = async (req, res) => {
