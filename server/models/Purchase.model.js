@@ -12,10 +12,6 @@ const purchaseSchema = new Schema({
         ref: 'User',
         required: true
     },
-    imageUrl :{
-        type:String,
-        required:true
-    },
     amount: {
         type: Number,
         required: true,
