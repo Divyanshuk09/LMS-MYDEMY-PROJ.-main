@@ -1,3 +1,4 @@
+
 import mongoose, { Schema } from "mongoose";
 
 const purchaseSchema = new Schema({
@@ -8,6 +9,7 @@ const purchaseSchema = new Schema({
     },
     userId: {
         type: String,
+        ref: 'User',
         required: true
     },
     imageUrl :{

@@ -103,7 +103,7 @@ export const stripeWebhooks = async (request, response) => {
             break;
         case 'checkout.session.async_payment_failed':
             await handleSessionFailed(event.data.object);
-            breaak;
+            break;
         case 'charge.failed':
             await handleChargeFailed(event.data.object);
             break;

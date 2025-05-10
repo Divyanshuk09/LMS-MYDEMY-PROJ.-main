@@ -28,21 +28,19 @@ export const updateRoleToEducator = async (req, res) => {
     }
 }
 
-// Updated addCourse controller
+// Add new course
 export const addCourse = async (req, res) => {
     try {
         const { courseData } = req.body;
         const imageFile = req.file;
-        const imageUrl = req.body.imageUrl; // Added for URL support
         const educatorId = req.auth.userId;
 
-        if (!imageFile && !imageUrl) {
-            return res.status(400).json({
+        if (!imageFile) {
+            return res.json({
                 success: false,
-                message: 'Thumbnail image or URL is required'
-            });
+                message: 'Thumbnail Not Attached'
+            })
         }
-
         let parsedCourseData;
         try {
             parsedCourseData = JSON.parse(courseData);
@@ -52,20 +50,13 @@ export const addCourse = async (req, res) => {
                 message: 'Invalid courseData format'
             });
         }
-
-        let imageResult;
-        if (imageFile) {
-            // Handle file upload
-            imageResult = await cloudinary.uploader.upload(imageFile.path);
-        } else if (imageUrl) {
-            // Handle URL upload
-            imageResult = await cloudinary.uploader.upload(imageUrl);
-        }
+        // Upload image to Cloudinary
+        const result = await cloudinary.uploader.upload(imageFile.path);
 
         const newCourse = await Course.create({
             ...parsedCourseData,
             educator: educatorId,
-            courseThumbnail: imageResult.secure_url
+            courseThumbnail: result.secure_url
         });
 
         res.status(201).json({
@@ -74,13 +65,13 @@ export const addCourse = async (req, res) => {
             course: newCourse
         });
     } catch (error) {
-        console.error(error);
         res.status(500).json({
             success: false,
             message: error.message || 'Server error'
         });
     }
 }
+
 //delete the course
 
 export const deleteCourse = async (req, res) => {
