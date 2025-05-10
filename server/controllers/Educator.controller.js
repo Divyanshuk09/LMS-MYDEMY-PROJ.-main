@@ -209,7 +209,6 @@ export const educatorDashboardData = async (req, res) => {
 export const getEnrolledStudentsData = async (req, res) => {
     try {
         const educator = req.auth.userId
-
         const courses = await Course.find({ educator })
         const courseIds = courses.map(course => course._id);
 
@@ -217,7 +216,7 @@ export const getEnrolledStudentsData = async (req, res) => {
         const purchases = await Purchase.find({
             courseId: { $in: courseIds },
             status: 'completed'
-        }).populate('userId', 'name' , 'imageUrl').populate('courseId', 'courseTitle')
+        }).populate('userId', 'name imageUrl').populate('courseId', 'courseTitle')
 
         const enrolledStudents = purchases.map(purchase => ({
             student: purchase.userId,
