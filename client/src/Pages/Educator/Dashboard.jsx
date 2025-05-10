@@ -111,8 +111,10 @@ const Dashboard = () => {
                   <tr
                     key={index}
                     className={`border-b ${
-                      isDark ? "border-gray-700" : "border-gray-500/40"
-                    }`}
+                    isDark
+                      ? "bg-gray-600/20 border-gray-600"
+                      : "bg-gray-100 border-gray-300"
+                  }`}
                   >
                     <th
                       scope="row"

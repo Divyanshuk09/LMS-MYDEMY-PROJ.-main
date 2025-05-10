@@ -119,8 +119,8 @@ const MyCourses = () => {
                   key={course._id}
                   className={`border-b ${
                     isDark
-                      ? "hover:bg-gray-600/20 border-gray-600"
-                      : "hover:bg-gray-100 border-gray-300"
+                      ? "bg-gray-600/20 border-gray-600"
+                      : "bg-gray-100 border-gray-300"
                   }`}
                 >
                   {/* Number */}
@@ -131,7 +131,7 @@ const MyCourses = () => {
                     onClick={() =>
                       navigate(`/educator/my-courses/${course._id}`)
                     }
-                    className="px-6 py-4 whitespace-nowrap cursor-pointer flex items-center gap-3"
+                    className="px-6 py-4 whitespace-nowrap flex items-center gap-3"
                   >
                     <img
                       src={course.courseThumbnail}
@@ -152,7 +152,7 @@ const MyCourses = () => {
                     onClick={() =>
                       navigate(`/educator/my-courses/${course._id}`)
                     }
-                    className={`px-6 py-4 cursor-pointer ${
+                    className={`px-6 py-4 ${
                       isDark ? "text-gray-300" : "text-gray-900"
                     }`}
                   >
@@ -169,7 +169,7 @@ const MyCourses = () => {
                     onClick={() =>
                       navigate(`/educator/my-courses/${course._id}`)
                     }
-                    className={`px-6 py-4 cursor-pointer ${
+                    className={`px-6 py-4 ${
                       isDark ? "text-gray-300" : "text-gray-900"
                     }`}
                   >
@@ -181,7 +181,7 @@ const MyCourses = () => {
                     onClick={() =>
                       navigate(`/educator/my-courses/${course._id}`)
                     }
-                    className={`px-6 py-4 cursor-pointer ${
+                    className={`px-6 py-4 ${
                       isDark ? "text-gray-300" : "text-gray-900"
                     }`}
                   >

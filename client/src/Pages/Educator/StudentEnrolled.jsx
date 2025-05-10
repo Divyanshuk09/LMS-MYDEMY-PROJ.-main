@@ -78,8 +78,10 @@ const StudentEnrolled = () => {
                   <tr
                     key={index}
                     className={`border-b ${
-                      isDark ? "border-gray-700" : "border-gray-500/40"
-                    }`}
+                    isDark
+                      ? "bg-gray-600/20 border-gray-600"
+                      : "bg-gray-100 border-gray-300"
+                  }`}
                   >
                     <th
                       scope="row"
@@ -90,7 +92,7 @@ const StudentEnrolled = () => {
                       {index + 1}
                     </th>
                     <td
-                      className={`px-6 py-4 flex items-center gap-1 ${
+                      className={`px-6 py-4 flex items-center gap-3 ${
                         isDark ? "text-white" : "text-gray-900"
                       }`}
                     >
