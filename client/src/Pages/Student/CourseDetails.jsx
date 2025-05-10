@@ -226,7 +226,7 @@ const CourseDetails = () => {
           >
             {courseData?.courseDescription && (
               <div
-                className="ql-editor"
+                className="ql-editor text-sm"
                 dangerouslySetInnerHTML={{
                   __html: courseData.courseDescription,
                 }}

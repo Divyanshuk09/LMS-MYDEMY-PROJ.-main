@@ -134,7 +134,9 @@ const Player = () => {
             isDark ? "text-gray-200" : "text-gray-600"
           }`}
         >
-          <h2 className="md:text-2xl text-xl font-semibold">Course Structure :</h2>
+          <h2 className="md:text-2xl text-xl font-semibold">
+            Course Structure :
+          </h2>
           <div className="pt-5">
             {courseData &&
               courseData?.courseContent?.map((chapter, index) => (
@@ -180,7 +182,11 @@ const Player = () => {
                             ) : (
                               <MdPlayCircle className="text-blue-500" />
                             )}
-                            <div className={`flex items-center justify-between w-full ${isDark?"text-gray-400":"text-gray-800"}  text-xs md:text-default`}>
+                            <div
+                              className={`flex items-center justify-between w-full ${
+                                isDark ? "text-gray-400" : "text-gray-800"
+                              }  text-xs md:text-default`}
+                            >
                               <p className="text-xs md:text-sm">
                                 {lecture.lectureTitle}
                               </p>
@@ -216,28 +222,47 @@ const Player = () => {
               ))}
           </div>
           {/* courseDescription */}
-          <div className={`pt-4 pb-10 ${isDark?"text-gray-500":"text-gray-600"}`}>
-            <h1 className={`${isDark?"text-gray-400":"text-gray-800"} text-2xl mt-4 md:text-3xl font-semibold`}>
+          <div
+            className={`pt-4 pb-10 ${
+              isDark ? "text-gray-500" : "text-gray-600"
+            }`}
+          >
+            <h1
+              className={`${
+                isDark ? "text-gray-400" : "text-gray-800"
+              } text-2xl mt-4 md:text-3xl font-semibold`}
+            >
               Course Description :
             </h1>
-
-          {courseData?.courseDescription && (
-              <div
-                className="ql-editor"
-                dangerouslySetInnerHTML={{
-                  __html: courseData.courseDescription,
-                }}
-                style={{
-                  color: isDark ? "#D1D5DB" : "#4B5563",
-                  padding: 0,
-                  background: "transparent",
-                }}
-              />
-            )}
+            <p
+              className={`text-sm mt-2 ${
+                isDark ? "text-gray-300" : "text-gray-600"
+              }`}
+            >
+              {courseData?.courseDescription && (
+                <div
+                  className="ql-editor text-sm"
+                  dangerouslySetInnerHTML={{
+                    __html: courseData.courseDescription,
+                  }}
+                  style={{
+                    color: isDark ? "#D1D5DB" : "#4B5563",
+                    padding: 0,
+                    background: "transparent",
+                  }}
+                />
+              )}
+            </p>
           </div>
 
           <div className="flex items-center gap-2 py-3 mt-10">
-            <h1 className={`text-xl font-bold ${isDark?"text-gray-500":"text-gray-800"}`}>Rate this course:</h1>
+            <h1
+              className={`text-xl font-bold ${
+                isDark ? "text-gray-500" : "text-gray-800"
+              }`}
+            >
+              Rate this course:
+            </h1>
             <Rating initialRating={initialRating} onRate={handleRating} />
           </div>
         </div>
