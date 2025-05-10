@@ -15,7 +15,6 @@ import StudentEnrolled from "./Pages/Educator/StudentEnrolled";
 import Navbar from "./Components/Student/Navbar";
 import Hero from "./Components/Student/Hero";
 import { ToastContainer } from "react-toastify";
-import MycoursePage from "./Pages/Educator/MycoursePage";
 import { useTheme } from "./Context/ThemeContext";
 
 // App.js
@@ -45,7 +44,6 @@ const App = () => {
           <Route index element={<Dashboard />} />
           <Route path="add-course" element={<AddCourse />} />
           <Route path="my-courses" element={<MyCourses />} />
-          <Route path="my-courses/:id" element={<MycoursePage />} />
           <Route path="student-enrolled" element={<StudentEnrolled />} />
         </Route>
       </Routes>
