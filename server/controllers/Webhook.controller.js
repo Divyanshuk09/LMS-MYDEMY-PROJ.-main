@@ -75,8 +75,9 @@ export const clerkWebhooks = async (req, res) => {
     }
 };
 
-const stripInstance = new Stripe(process.env.STRIPE_SECRET_KEY)
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET
+// Initialize Stripe with correct variable name
+const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY);
+const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 export const stripeWebhooks = async (request, response) => {
     const sig = request.headers['stripe-signature'];
@@ -85,17 +86,18 @@ export const stripeWebhooks = async (request, response) => {
 
     try {
         event = stripeInstance.webhooks.constructEvent(
-            request.body,
+            request.body, // This now correctly receives raw body
             sig,
             endpointSecret
         );
-    }
-    catch (err) {
-        console.log(`Webhook Error: ${err.message}`);
-        return response.status(400).send(`Webhook Error: ${err.message}`);
+    } catch (err) {
+        console.error(`❌ Webhook Signature Error: ${err.message}`);
+        return response.status(400).json({ 
+            success: false,
+            error: `Webhook Error: ${err.message}` 
+        });
     }
 
-    // Handle the event
     try {
         switch (event.type) {
             case 'checkout.session.completed':
@@ -107,13 +109,12 @@ export const stripeWebhooks = async (request, response) => {
             case 'charge.failed':
                 await handleChargeFailed(event.data.object);
                 break;
-
             default:
-                console.log(`unhandled event type: ${event.type}`)
+                console.log(`⚠️ Unhandled event type: ${event.type}`);
         }
-        return response.json({ success: true })
+        return response.json({ success: true });
     } catch (error) {
-        console.error('webhook error:', error)
+        console.error('🔥 Webhook Processing Error:', error);
         return response.status(500).json({
             success: false,
             error: error.message
@@ -121,65 +122,85 @@ export const stripeWebhooks = async (request, response) => {
     }
 };
 
-//helper functions:
+// Enhanced Helper Functions
 async function handleSessionCompleted(session) {
     try {
+        if (!session?.metadata?.purchaseId) {
+            throw new Error('Missing purchaseId in session metadata');
+        }
+
         const purchase = await Purchase.findById(session.metadata.purchaseId);
         if (!purchase) {
-            console.log("Purchase not found");
-            return;
+            throw new Error(`Purchase not found: ${session.metadata.purchaseId}`);
         }
-        if (session.payment_status === 'paid') {
-            purchase.status = 'completed';
-            await purchase.save();
 
-            await Promise.all([
-                User.findByIdAndUpdate(
-                    purchase.userId,
-                    {
-                        $addToSet: { enrolledCourses: purchase.courseId }
-                    }),
-                Course.findByIdAndUpdate(
-                    purchase.courseId,
-                    {
-                        $addToSet: { enrolledStudents: purchase.userId }
-                    })
-            ])
-            console.log(`✅ Successfully enrolled user to course (Purchase ID: ${purchase._id})`);
+        if (session.payment_status === 'paid') {
+            // Transaction to ensure data consistency
+            const session = await Purchase.startSession();
+            await session.withTransaction(async () => {
+                purchase.status = 'completed';
+                await purchase.save({ session });
+
+                await Promise.all([
+                    User.findByIdAndUpdate(
+                        purchase.userId,
+                        { $addToSet: { enrolledCourses: purchase.courseId } },
+                        { session }
+                    ),
+                    Course.findByIdAndUpdate(
+                        purchase.courseId,
+                        { $addToSet: { enrolledStudents: purchase.userId } },
+                        { session }
+                    )
+                ]);
+            });
+
+            console.log(`✅ Successfully processed purchase ${purchase._id}`);
         } else {
             purchase.status = 'failed';
             await purchase.save();
-            console.warn(`Payment failed for puchase ${purchase._id}`)
+            console.warn(`⚠️ Payment failed for purchase ${purchase._id}`);
         }
     } catch (error) {
-        console.error('❌ Error handling session:', error);
+        console.error('💥 Session Completion Error:', error);
+        throw error; // Re-throw to trigger webhook error response
     }
 }
+
 async function handleSessionFailed(session) {
     try {
+        if (!session?.metadata?.purchaseId) {
+            throw new Error('Missing purchaseId in session metadata');
+        }
+
         const purchase = await Purchase.findByIdAndUpdate(
             session.metadata.purchaseId,
             { status: 'failed' },
             { new: true }
-        )
-    
+        );
+
         if (!purchase) {
-            console.log(`💥 Payment failed for purchase ${purchase._id}`);
-            return;
+            throw new Error(`Purchase not found: ${session.metadata.purchaseId}`);
         }
-    
+
         console.log(`⚠️ Marked purchase ${purchase._id} as failed`);
     } catch (error) {
-        console.error('💥 Session failure error:', error);
+        console.error('💥 Session Failure Error:', error);
+        throw error;
     }
 }
+
 async function handleChargeFailed(charge) {
     try {
-        const sessions = await stripInstance.checkout.sessions.list({
+        if (!charge.payment_intent) {
+            throw new Error('Missing payment_intent in charge');
+        }
+
+        const sessions = await stripeInstance.checkout.sessions.list({
             payment_intent: charge.payment_intent
         });
-    
-        if (sessions.data.length > 0) {
+
+        if (sessions.data.length > 0 && sessions.data[0].metadata?.purchaseId) {
             await Purchase.findByIdAndUpdate(
                 sessions.data[0].metadata.purchaseId,
                 { status: 'failed' }
@@ -187,7 +208,8 @@ async function handleChargeFailed(charge) {
             console.log(`⚠️ Marked purchase as failed for charge ${charge.id}`);
         }
     } catch (error) {
-        console.error('💥 Charge failure error:', error);
+        console.error('💥 Charge Failure Error:', error);
+        throw error;
     }
 }
 
