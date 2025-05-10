@@ -10,7 +10,7 @@ const CourseSection = () => {
 
   return (
     <>
-      <div className="py-16 md:px-40 px-8">
+      <div className="py-16 md:px-40 px-8 ">
         <h1
           className={`md:text-3xl text-lg  font-medium ${
             isDark ? "text-white" : "text-gray-800"
@@ -24,7 +24,7 @@ const CourseSection = () => {
           deliver
         </p>
 
-        <div className="grid gap-4 px-4 md:px-0 md:my-16 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 my-10 ">
           {allcourses.slice(0, 4).map((course, index) => (
             <CourseCard key={index} course={course} />
           ))}

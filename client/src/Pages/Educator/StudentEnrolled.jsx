@@ -17,6 +17,7 @@ const StudentEnrolled = () => {
         backendUrl + "/api/educator/enrolled-students",
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      console.log(data);
       if (data.success) {
         setEnrolledStudents(data.enrolledStudents.reverse());
       } else {

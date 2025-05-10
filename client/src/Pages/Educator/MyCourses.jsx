@@ -105,7 +105,8 @@ const MyCourses = () => {
               }`}
             >
               <tr>
-                <th className="px-6 py-3 text-left">All Courses</th>
+                <th className="px py-3">#</th>
+                <th className="px-6 py-3 text-left">Courses</th>
                 <th className="px-6 py-3 text-left">Earnings</th>
                 <th className="px-6 py-3 text-left">Students</th>
                 <th className="px-6 py-3 text-left">Published On</th>
@@ -122,6 +123,9 @@ const MyCourses = () => {
                       : "hover:bg-gray-100 border-gray-300"
                   }`}
                 >
+                  {/* Number */}
+                  <td className="px-4 py-4">{courses.indexOf(course) + 1}</td>
+
                   {/* Course Thumbnail & Title */}
                   <td
                     onClick={() =>

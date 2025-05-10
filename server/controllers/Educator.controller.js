@@ -28,19 +28,21 @@ export const updateRoleToEducator = async (req, res) => {
     }
 }
 
-// Add new course
+// Updated addCourse controller
 export const addCourse = async (req, res) => {
     try {
         const { courseData } = req.body;
         const imageFile = req.file;
+        const imageUrl = req.body.imageUrl; // Added for URL support
         const educatorId = req.auth.userId;
 
-        if (!imageFile) {
-            return res.json({
+        if (!imageFile && !imageUrl) {
+            return res.status(400).json({
                 success: false,
-                message: 'Thumbnail Not Attached'
-            })
+                message: 'Thumbnail image or URL is required'
+            });
         }
+
         let parsedCourseData;
         try {
             parsedCourseData = JSON.parse(courseData);
@@ -50,13 +52,20 @@ export const addCourse = async (req, res) => {
                 message: 'Invalid courseData format'
             });
         }
-        // Upload image to Cloudinary
-        const result = await cloudinary.uploader.upload(imageFile.path);
+
+        let imageResult;
+        if (imageFile) {
+            // Handle file upload
+            imageResult = await cloudinary.uploader.upload(imageFile.path);
+        } else if (imageUrl) {
+            // Handle URL upload
+            imageResult = await cloudinary.uploader.upload(imageUrl);
+        }
 
         const newCourse = await Course.create({
             ...parsedCourseData,
             educator: educatorId,
-            courseThumbnail: result.secure_url
+            courseThumbnail: imageResult.secure_url
         });
 
         res.status(201).json({
@@ -65,13 +74,13 @@ export const addCourse = async (req, res) => {
             course: newCourse
         });
     } catch (error) {
+        console.error(error);
         res.status(500).json({
             success: false,
             message: error.message || 'Server error'
         });
     }
 }
-
 //delete the course
 
 export const deleteCourse = async (req, res) => {
@@ -200,6 +209,7 @@ export const educatorDashboardData = async (req, res) => {
 export const getEnrolledStudentsData = async (req, res) => {
     try {
         const educator = req.auth.userId
+
         const courses = await Course.find({ educator })
         const courseIds = courses.map(course => course._id);
 
@@ -207,7 +217,7 @@ export const getEnrolledStudentsData = async (req, res) => {
         const purchases = await Purchase.find({
             courseId: { $in: courseIds },
             status: 'completed'
-        }).populate('userId', 'name imageUrl').populate('courseId', 'courseTitle')
+        }).populate('userId', 'name' , 'imageUrl').populate('courseId', 'courseTitle')
 
         const enrolledStudents = purchases.map(purchase => ({
             student: purchase.userId,
