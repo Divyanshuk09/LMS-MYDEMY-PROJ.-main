@@ -106,14 +106,6 @@ const CourseDetails = () => {
           >
             {courseData?.courseTitle}
           </h1>
-          <p
-            className={`text-lg  sm:text-base mb-3 ${
-              isDark ? "text-gray-300" : "text-gray-600"
-            }`}
-            dangerouslySetInnerHTML={{
-              __html: courseData?.courseDescription.slice(0, 200),
-            }}
-          />
 
           {/* Rating + Educator */}
           <div className="flex items-center gap-3 flex-wrap text-sm mb-2">
@@ -229,12 +221,23 @@ const CourseDetails = () => {
           </h2>
           <p
             className={`text-sm mt-2 ${
-              isDark ? "text-gray-500" : "text-gray-600"
+              isDark ? "text-gray-300" : "text-gray-600"
             }`}
-            dangerouslySetInnerHTML={{
-              __html: courseData?.courseDescription,
-            }}
-          />
+          >
+            {courseData?.courseDescription && (
+              <div
+                className="ql-editor"
+                dangerouslySetInnerHTML={{
+                  __html: courseData.courseDescription,
+                }}
+                style={{
+                  color: isDark ? "#D1D5DB" : "#4B5563",
+                  padding: 0,
+                  background: "transparent",
+                }}
+              />
+            )}
+          </p>
         </div>
 
         {/* Right Column */}

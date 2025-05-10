@@ -220,14 +220,20 @@ const Player = () => {
             <h1 className={`${isDark?"text-gray-400":"text-gray-800"} text-2xl mt-4 md:text-3xl font-semibold`}>
               Course Description :
             </h1>
-            <p
-            className={`text-lg  sm:text-base mb-3 ${
-              isDark ? "text-gray-300" : "text-gray-600"
-            }`}
-            dangerouslySetInnerHTML={{
-              __html: courseData?.courseDescription.slice(0, 200),
-            }}
-          />
+
+          {courseData?.courseDescription && (
+              <div
+                className="ql-editor"
+                dangerouslySetInnerHTML={{
+                  __html: courseData.courseDescription,
+                }}
+                style={{
+                  color: isDark ? "#D1D5DB" : "#4B5563",
+                  padding: 0,
+                  background: "transparent",
+                }}
+              />
+            )}
           </div>
 
           <div className="flex items-center gap-2 py-3 mt-10">
@@ -260,7 +266,7 @@ const Player = () => {
                 }}
                 iframeClassName="w-full aspect-video"
               />
-              <div className="flex justify-between items-center mt-4 px-2">
+              <div className="flex justify-between items-center mt-4 text-sm lg:text-base px-2">
                 <p className="font-bold">
                   {playerData.chapter}.{playerData.lecture}{" "}
                   {playerData.lectureTitle}
