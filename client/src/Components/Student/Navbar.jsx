@@ -68,14 +68,7 @@ const Navbar = () => {
   `}
       >
         <a href="/" className="flex items-center">
-          <img src={logo} className="h-8 w-12" alt="Logo" />
-          <span
-            className={`${
-              isDark ? "text-gray-300" : "text-black/80"
-            } text-lg hidden md:block lg:block sm:block font-semibold`}
-          >
-            MyDemy
-          </span>
+          <img src={logo} className="h-12 w-12" alt="Logo" />
         </a>
 
         {/* Desktop view */}

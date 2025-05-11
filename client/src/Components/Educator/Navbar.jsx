@@ -20,14 +20,7 @@ const Navbar = () => {
         } py-4 `}
       >
         <a href="/" className="flex items-center">
-          <img src={logo} className="h-8 w-12" alt="Logo" />
-          <span
-            className={`${
-              isDark ? "text-white" : "text-black/80"
-            } text-lg hidden md:block lg:block sm:block font-semibold`}
-          >
-            MyDemy
-          </span>
+          <img src={logo} className="h-12 w-12" alt="Logo" />
         </a>
 
         <div
