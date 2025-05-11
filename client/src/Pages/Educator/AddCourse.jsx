@@ -17,25 +17,18 @@ const AddCourse = () => {
   const editorRef = useRef(null);
   const dropRef = useRef(null);
 
-  // Form state
-  const [formData, setFormData] = useState({
+  // Initial form state
+  const initialFormState = {
     courseTitle: "",
     description: "",
     coursePrice: 0,
     discount: 0,
     image: null,
     imageUrl: "",
-  });
+  };
 
-  // Validation errors
-  const [errors, setErrors] = useState({
-    courseTitle: "",
-    description: "",
-    coursePrice: "",
-    discount: "",
-    image: "",
-  });
-
+  const [formData, setFormData] = useState(initialFormState);
+  const [errors, setErrors] = useState({});
   const [buttonText, setButtonText] = useState("Add Course");
   const [chapters, setChapters] = useState([]);
   const [showPopUp, setShowPopUp] = useState(false);
@@ -54,103 +47,82 @@ const AddCourse = () => {
       courseTitle: !formData.courseTitle ? "Course title is required" : "",
       description: !formData.description ? "Description is required" : "",
       coursePrice: formData.coursePrice < 0 ? "Price cannot be negative" : "",
-      discount:
-        formData.discount < 0 || formData.discount > 100
-          ? "Discount must be between 0-100%"
-          : "",
+      discount: formData.discount < 0 || formData.discount > 100 
+        ? "Discount must be between 0-100%" : "",
       image: !formData.image ? "Thumbnail is required" : "",
     };
 
     setErrors(newErrors);
-    return !Object.values(newErrors).some((error) => error !== "");
+    return !Object.values(newErrors).some(error => error);
   };
 
-  // Check if form is valid for button state
+  // Check if form is valid
   const isFormValid = () => {
-    return (
-      formData.courseTitle &&
+    return formData.courseTitle &&
       formData.description &&
       formData.coursePrice >= 0 &&
       formData.discount >= 0 &&
       formData.discount <= 100 &&
       formData.image &&
-      chapters.length > 0
-    );
+      chapters.length > 0;
   };
 
-  // Handle drag events for image drop
-  const handleDragEnter = (e) => {
+  // Handle drag events
+  const handleDrag = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const file = e.dataTransfer.files[0];
-      if (file.type.startsWith("image/")) {
-        setFormData({ ...formData, image: file, imageUrl: "" });
-      } else {
-        setErrors({ ...errors, image: "Please upload an image file" });
-      }
-      e.dataTransfer.clearData();
+    
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setIsDragging(true);
+    } else if (e.type === 'dragleave' || e.type === 'drop') {
+      setIsDragging(false);
     }
   };
 
+  const handleDrop = (e) => {
+    handleDrag(e);
+    if (e.dataTransfer.files?.length) {
+      const file = e.dataTransfer.files[0];
+      handleImageUpload(file);
+    }
+  };
 
-  // Handle file upload
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (file && file.type.startsWith("image/")) {
-      setFormData({ ...formData, image: file, imageUrl: "" });
-      setErrors({ ...errors, image: "" });
+  const handleImageUpload = (file) => {
+    if (file?.type.startsWith("image/")) {
+      setFormData(prev => ({ ...prev, image: file, imageUrl: "" }));
+      setErrors(prev => ({ ...prev, image: "" }));
     } else {
-      setErrors({ ...errors, image: "Please select an image file" });
+      setErrors(prev => ({ ...prev, image: "Please upload an image file" }));
     }
   };
 
   // Chapter management
   const handleChapter = (action, chapterId) => {
-    if (action === "add") {
-      const title = prompt("Enter the Chapter Name:");
-      if (title) {
-        const newChapter = {
-          chapterId: uniqid(),
-          chapterTitle: title,
-          chapterContent: [],
-          collapsed: false,
-          chapterOrder:
-            chapters.length > 0 ? chapters.slice(-1)[0].chapterOrder + 1 : 1,
-        };
-        setChapters([...chapters, newChapter]);
-      }
-    } else if (action === "remove") {
-      setChapters(
-        chapters.filter((chapter) => chapter.chapterId !== chapterId)
-      );
-    } else if (action === "toggle") {
-      setChapters(
-        chapters.map((chapter) =>
-          chapter.chapterId === chapterId
-            ? { ...chapter, collapsed: !chapter.collapsed }
+    switch (action) {
+      case "add":
+        const title = prompt("Enter the Chapter Name:");
+        if (title) {
+          setChapters(prev => [...prev, {
+            chapterId: uniqid(),
+            chapterTitle: title,
+            chapterContent: [],
+            collapsed: false,
+            chapterOrder: prev.length > 0 ? prev.slice(-1)[0].chapterOrder + 1 : 1,
+          }]);
+        }
+        break;
+      case "remove":
+        setChapters(prev => prev.filter(chapter => chapter.chapterId !== chapterId));
+        break;
+      case "toggle":
+        setChapters(prev => prev.map(chapter => 
+          chapter.chapterId === chapterId 
+            ? { ...chapter, collapsed: !chapter.collapsed } 
             : chapter
-        )
-      );
+        ));
+        break;
+      default:
+        break;
     }
   };
 
@@ -160,16 +132,14 @@ const AddCourse = () => {
       setCurrentChapterId(chapterId);
       setShowPopUp(true);
     } else if (action === "remove") {
-      setChapters(
-        chapters.map((chapter) => {
-          if (chapter.chapterId === chapterId) {
-            const updatedContent = [...chapter.chapterContent];
-            updatedContent.splice(lectureIndex, 1);
-            return { ...chapter, chapterContent: updatedContent };
-          }
-          return chapter;
-        })
-      );
+      setChapters(prev => prev.map(chapter => {
+        if (chapter.chapterId === chapterId) {
+          const updatedContent = [...chapter.chapterContent];
+          updatedContent.splice(lectureIndex, 1);
+          return { ...chapter, chapterContent: updatedContent };
+        }
+        return chapter;
+      }));
     }
   };
 
@@ -179,25 +149,22 @@ const AddCourse = () => {
       return;
     }
 
-    setChapters(
-      chapters.map((chapter) => {
-        if (chapter.chapterId === currentChapterId) {
-          const newLecture = {
-            ...lectureDetails,
-            lectureOrder:
-              chapter.chapterContent.length > 0
-                ? chapter.chapterContent.slice(-1)[0].lectureOrder + 1
-                : 1,
-            lectureId: uniqid(),
-          };
-          return {
-            ...chapter,
-            chapterContent: [...chapter.chapterContent, newLecture],
-          };
-        }
-        return chapter;
-      })
-    );
+    setChapters(prev => prev.map(chapter => {
+      if (chapter.chapterId === currentChapterId) {
+        const newLecture = {
+          ...lectureDetails,
+          lectureOrder: chapter.chapterContent.length > 0 
+            ? chapter.chapterContent.slice(-1)[0].lectureOrder + 1 
+            : 1,
+          lectureId: uniqid(),
+        };
+        return {
+          ...chapter,
+          chapterContent: [...chapter.chapterContent, newLecture],
+        };
+      }
+      return chapter;
+    }));
 
     setShowPopUp(false);
     setLectureDetails({
@@ -235,13 +202,7 @@ const AddCourse = () => {
 
       const formDataToSend = new FormData();
       formDataToSend.append("courseData", JSON.stringify(courseData));
-
-      if (formData.image) {
-        formDataToSend.append("image", formData.image);
-      } else if (formData.imageUrl) {
-        // For image URLs, we might need to handle differently in backend
-        formDataToSend.append("imageUrl", formData.imageUrl);
-      }
+      formDataToSend.append("image", formData.image);
 
       const token = await getToken();
       const { data } = await axios.post(
@@ -253,18 +214,9 @@ const AddCourse = () => {
       if (data.success) {
         toast.success(data.message);
         // Reset form
-        setFormData({
-          courseTitle: "",
-          description: "",
-          coursePrice: 0,
-          discount: 0,
-          image: null,
-          imageUrl: "",
-        });
+        setFormData(initialFormState);
         setChapters([]);
-        if (quillRef.current) {
-          quillRef.current.root.innerHTML = "";
-        }
+        quillRef.current?.root?.innerHTML && (quillRef.current.root.innerHTML = "");
       } else {
         toast.error(data.message);
       }
@@ -294,219 +246,161 @@ const AddCourse = () => {
       });
 
       quillRef.current.on("text-change", () => {
-        setFormData({
-          ...formData,
+        setFormData(prev => ({
+          ...prev,
           description: quillRef.current.root.innerHTML,
-        });
+        }));
       });
     }
   }, []);
 
+  // Helper function for input styling
+  const inputStyle = `outline-none md:py-2.5 py-2 px-3 rounded border ${
+    isDark ? "bg-gray-800/40 text-white border-gray-600" : "bg-white text-black border-gray-500"
+  }`;
+
   return (
-    <div
-      className={`h-fit overflow-scroll  md:px-5 flex flex-col md:flex-row lg:flex-row items-start justify-between ${
-        isDark ? "text-white" : "text-black"
-      }`}
-    >
-      <form
-        onSubmit={handleSubmit}
-        className="flex flex-col gap-4 max-w-md w-full text-gray-500"
-      >
+    <div className={`h-fit overflow-scroll md:px-5 flex flex-col md:flex-row lg:flex-row items-start justify-between ${
+      isDark ? "text-white" : "text-black"
+    }`}>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-md w-full">
         {/* Course Thumbnail */}
         <div className="flex flex-col gap-2">
-          <label className={`${isDark ? "text-gray-200" : "text-black"}`}>
+          <label className={isDark ? "text-gray-200" : "text-black"}>
             Course Thumbnail *
           </label>
-
           
-            <div className="flex flex-col gap-3 p-3 rounded-lg border border-gray-300">
-              {/* Drag and Drop */}
-              <div
-                ref={dropRef}
-                onDragEnter={handleDragEnter}
-                onDragLeave={handleDragLeave}
-                onDragOver={handleDragOver}
-                onDrop={handleDrop}
-                className={`p-4 border-2 border-dashed rounded-lg text-center cursor-pointer transition-all ${
-                  isDragging
-                    ? "border-blue-500 bg-blue-50/20"
-                    : isDark
-                    ? "border-gray-600 hover:border-gray-500"
-                    : "border-gray-300 hover:border-gray-400"
-                }`}
-              >
-                <FaDropbox className="mx-auto text-2xl mb-2" />
-                <p>Drag & drop image here</p>
-                <p className="text-xs text-gray-500">or</p>
-                <label className="inline-block mt-2 px-4 py-2 bg-blue-500 text-white rounded cursor-pointer">
-                  Browse files
-                  <input
-                    type="file"
-                    onChange={handleFileUpload}
-                    accept="image/*"
-                    className="hidden"
-                  />
-                </label>
-              </div>
+          <div className="flex flex-col gap-3 p-3 rounded-lg border border-gray-300">
+            <div
+              ref={dropRef}
+              onDragEnter={handleDrag}
+              onDragLeave={handleDrag}
+              onDragOver={handleDrag}
+              onDrop={handleDrop}
+              className={`p-4 border-2 border-dashed rounded-lg text-center cursor-pointer transition-all ${
+                isDragging ? "border-blue-500 bg-blue-50/20" :
+                isDark ? "border-gray-600 hover:border-gray-500" : "border-gray-300 hover:border-gray-400"
+              }`}
+            >
+              <FaDropbox className="mx-auto text-2xl mb-2" />
+              <p>Drag & drop image here</p>
+              <p className="text-xs text-gray-500">or</p>
+              <label className="inline-block mt-2 px-4 py-2 bg-blue-500 text-white rounded cursor-pointer">
+                Browse files
+                <input
+                  type="file"
+                  onChange={(e) => handleImageUpload(e.target.files[0])}
+                  accept="image/*"
+                  className="hidden"
+                />
+              </label>
             </div>
-            <p className="text-xs text-blue-600 font-sans">Note: To change the thumbanail just upload new image.</p>
-         
+          </div>
+          <p className="text-xs text-blue-600 font-sans">Note: To change the thumbnail just upload new image.</p>
 
           {/* Preview */}
-          {(formData.image || formData.imageUrl) && (
+          {formData.image && (
             <div className="mt-2">
               <p className="text-sm mb-1">Preview:</p>
               <div className="w-full h-40 bg-gray-100 dark:bg-gray-700 rounded overflow-hidden">
                 <img
-                  src={
-                    formData.image
-                      ? URL.createObjectURL(formData.image)
-                      : formData.imageUrl
-                  }
+                  src={URL.createObjectURL(formData.image)}
                   alt="Course thumbnail preview"
                   className="w-full h-full object-contain"
                 />
               </div>
             </div>
           )}
-
-          {errors.image && (
-            <p className="text-red-500 text-sm">{errors.image}</p>
-          )}
+          {errors.image && <p className="text-red-500 text-sm">{errors.image}</p>}
         </div>
 
         {/* Course Title */}
         <div className="flex flex-col gap-1">
-          <label className={`${isDark ? "text-gray-200" : "text-black"}`}>
+          <label className={isDark ? "text-gray-200" : "text-black"}>
             Course Title *
           </label>
           <input
             value={formData.courseTitle}
-            onChange={(e) =>
-              setFormData({ ...formData, courseTitle: e.target.value })
-            }
+            onChange={(e) => setFormData(prev => ({ ...prev, courseTitle: e.target.value }))}
             type="text"
             placeholder="Enter course title"
-            className={`outline-none md:py-2.5 py-2 px-3 rounded border ${
-              isDark
-                ? "bg-gray-800/40 text-white border-gray-600"
-                : "bg-white text-black border-gray-500"
-            }`}
+            className={inputStyle}
             required
           />
-          {errors.courseTitle && (
-            <p className="text-red-500 text-sm">{errors.courseTitle}</p>
-          )}
+          {errors.courseTitle && <p className="text-red-500 text-sm">{errors.courseTitle}</p>}
         </div>
 
         {/* Course Description */}
         <div className="flex flex-col gap-1">
-          <label className={`${isDark ? "text-gray-200" : "text-black"}`}>
+          <label className={isDark ? "text-gray-200" : "text-black"}>
             Course Description *
           </label>
-          <div
-            ref={editorRef}
-            className={` ${
-              isDark ? "bg-gray-800/40 text-white" : "bg-white text-black"
-            }`}
-          />
-          {errors.description && (
-            <p className="text-red-500 text-sm">{errors.description}</p>
-          )}
+          <div ref={editorRef} className={isDark ? "bg-gray-800/40 text-white" : "bg-white text-black"} />
+          {errors.description && <p className="text-red-500 text-sm">{errors.description}</p>}
         </div>
 
         {/* Course Price */}
         <div className="flex flex-col gap-1">
-          <label className={`${isDark ? "text-gray-200" : "text-black"}`}>
+          <label className={isDark ? "text-gray-200" : "text-black"}>
             Course Price (in $) *
           </label>
           <input
-            onChange={(e) =>
-              setFormData({ ...formData, coursePrice: e.target.value })
-            }
+            onChange={(e) => setFormData(prev => ({ ...prev, coursePrice: e.target.value }))}
             value={formData.coursePrice}
             type="number"
             placeholder="0"
             min="0"
             step="0.1"
-            className={`outline-none md:py-2.5 py-2 px-3 rounded border ${
-              isDark
-                ? "bg-gray-800/40 text-white border-gray-600"
-                : "bg-white text-black border-gray-500"
-            }`}
+            className={inputStyle}
             required
           />
-          {errors.coursePrice && (
-            <p className="text-red-500 text-sm">{errors.coursePrice}</p>
-          )}
+          {errors.coursePrice && <p className="text-red-500 text-sm">{errors.coursePrice}</p>}
         </div>
 
         {/* Discount */}
         <div className="flex flex-col gap-1">
-          <label className={`${isDark ? "text-gray-200" : "text-black"}`}>
+          <label className={isDark ? "text-gray-200" : "text-black"}>
             Discount (%) *
           </label>
           <input
-            onChange={(e) =>
-              setFormData({ ...formData, discount: e.target.value })
-            }
+            onChange={(e) => setFormData(prev => ({ ...prev, discount: e.target.value }))}
             value={formData.discount}
             type="number"
             placeholder="0"
             min="0"
             step="0.1"
             max="100"
-            className={`outline-none md:py-2.5 py-2 px-3 rounded border ${
-              isDark
-                ? "bg-gray-800/40 text-white border-gray-600"
-                : "bg-white text-black border-gray-500"
-            }`}
+            className={inputStyle}
             required
           />
-          {errors.discount && (
-            <p className="text-red-500 text-sm">{errors.discount}</p>
-          )}
+          {errors.discount && <p className="text-red-500 text-sm">{errors.discount}</p>}
         </div>
 
         {/* Chapters Section */}
         <div className="mt-4">
-          <h3
-            className={`text-lg font-semibold mb-3 ${
-              isDark ? "text-gray-200" : "text-black"
-            }`}
-          >
+          <h3 className={`text-lg font-semibold mb-3 ${isDark ? "text-gray-200" : "text-black"}`}>
             Course Chapters *
           </h3>
 
           {chapters.length === 0 && (
-            <p
-              className={`text-sm ${
-                isDark ? "text-gray-400" : "text-gray-600"
-              }`}
-            >
+            <p className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}>
               No chapters added yet
             </p>
           )}
 
-          {chapters.map((chapter, chapterIndex) => (
+          {chapters.map((chapter) => (
             <div
               key={chapter.chapterId}
-              className={`${
-                isDark
-                  ? "bg-gray-800/40 border-gray-700"
-                  : "bg-white border-gray-300"
-              } border rounded-lg mb-4`}
+              className={`${isDark ? "bg-gray-800/40 border-gray-700" : "bg-white border-gray-300"} border rounded-lg mb-4`}
             >
               <div className="flex justify-between items-center p-4 border-b">
                 <div className="flex items-center">
                   <MdArrowDropDown
                     onClick={() => handleChapter("toggle", chapter.chapterId)}
-                    className={`mr-2 cursor-pointer transition-all ${
-                      chapter.collapsed && "-rotate-90"
-                    }`}
+                    className={`mr-2 cursor-pointer transition-all ${chapter.collapsed && "-rotate-90"}`}
                   />
                   <span className="font-semibold">
-                    {chapterIndex + 1}. {chapter.chapterTitle}
+                    {chapter.chapterOrder}. {chapter.chapterTitle}
                   </span>
                 </div>
                 <span className="text-gray-500">
@@ -521,11 +415,7 @@ const AddCourse = () => {
               {!chapter.collapsed && (
                 <div className="p-4">
                   {chapter.chapterContent.length === 0 ? (
-                    <p
-                      className={`text-sm ${
-                        isDark ? "text-gray-400" : "text-gray-600"
-                      }`}
-                    >
+                    <p className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}>
                       No lectures in this chapter yet
                     </p>
                   ) : (
@@ -547,12 +437,9 @@ const AddCourse = () => {
                               className="text-blue-500 hover:underline"
                             >
                               View Link
-                            </a>{" "}
-                            •{" "}
+                            </a> •{" "}
                             {lecture.isPreviewFree ? (
-                              <span className="text-green-500">
-                                Free Preview
-                              </span>
+                              <span className="text-green-500">Free Preview</span>
                             ) : (
                               <span className="text-orange-500">Paid</span>
                             )}
@@ -560,13 +447,7 @@ const AddCourse = () => {
                         </div>
                         <MdClose
                           className="cursor-pointer hover:text-red-500"
-                          onClick={() =>
-                            handleLecture(
-                              "remove",
-                              chapter.chapterId,
-                              lectureIndex
-                            )
-                          }
+                          onClick={() => handleLecture("remove", chapter.chapterId, lectureIndex)}
                         />
                       </div>
                     ))
@@ -576,9 +457,7 @@ const AddCourse = () => {
                     type="button"
                     onClick={() => handleLecture("add", chapter.chapterId)}
                     className={`mt-2 px-3 py-1 rounded flex items-center gap-1 cursor-pointer ${
-                      isDark
-                        ? "bg-gray-600/50 text-white hover:bg-gray-600/70"
-                        : "bg-gray-200 text-black hover:bg-gray-300"
+                      isDark ? "bg-gray-600/50 text-white hover:bg-gray-600/70" : "bg-gray-200 text-black hover:bg-gray-300"
                     }`}
                   >
                     <span>+</span> Add Lecture
@@ -592,9 +471,7 @@ const AddCourse = () => {
             type="button"
             onClick={() => handleChapter("add")}
             className={`w-full py-2 rounded-lg flex items-center justify-center gap-2 cursor-pointer ${
-              isDark
-                ? "bg-blue-500 text-white hover:bg-blue-600"
-                : "bg-blue-200 text-black hover:bg-blue-300"
+              isDark ? "bg-blue-500 text-white hover:bg-blue-600" : "bg-blue-200 text-black hover:bg-blue-300"
             }`}
           >
             <span>+</span> Add Chapter
@@ -604,11 +481,9 @@ const AddCourse = () => {
         {/* Add Lecture Popup */}
         {showPopUp && (
           <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-black/50 z-50">
-            <div
-              className={`${
-                isDark ? "bg-gray-800 text-gray-200" : "bg-white text-gray-800"
-              } rounded-lg p-6 w-full max-w-md shadow-xl`}
-            >
+            <div className={`${
+              isDark ? "bg-gray-800 text-gray-200" : "bg-white text-gray-800"
+            } rounded-lg p-6 w-full max-w-md shadow-xl`}>
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl font-semibold">Add New Lecture</h3>
                 <button
@@ -625,16 +500,12 @@ const AddCourse = () => {
                   <input
                     type="text"
                     value={lectureDetails.lectureTitle}
-                    onChange={(e) =>
-                      setLectureDetails({
-                        ...lectureDetails,
-                        lectureTitle: e.target.value,
-                      })
-                    }
+                    onChange={(e) => setLectureDetails(prev => ({
+                      ...prev,
+                      lectureTitle: e.target.value,
+                    }))}
                     className={`w-full px-3 py-2 rounded border ${
-                      isDark
-                        ? "bg-gray-700 border-gray-600"
-                        : "bg-white border-gray-300"
+                      isDark ? "bg-gray-700 border-gray-600" : "bg-white border-gray-300"
                     }`}
                     placeholder="Enter lecture title"
                   />
@@ -646,16 +517,12 @@ const AddCourse = () => {
                     type="number"
                     min="1"
                     value={lectureDetails.lectureDuration}
-                    onChange={(e) =>
-                      setLectureDetails({
-                        ...lectureDetails,
-                        lectureDuration: e.target.value,
-                      })
-                    }
+                    onChange={(e) => setLectureDetails(prev => ({
+                      ...prev,
+                      lectureDuration: e.target.value,
+                    }))}
                     className={`w-full px-3 py-2 rounded border ${
-                      isDark
-                        ? "bg-gray-700 border-gray-600"
-                        : "bg-white border-gray-300"
+                      isDark ? "bg-gray-700 border-gray-600" : "bg-white border-gray-300"
                     }`}
                     placeholder="Enter duration in minutes"
                   />
@@ -666,16 +533,12 @@ const AddCourse = () => {
                   <input
                     type="url"
                     value={lectureDetails.lectureUrl}
-                    onChange={(e) =>
-                      setLectureDetails({
-                        ...lectureDetails,
-                        lectureUrl: e.target.value,
-                      })
-                    }
+                    onChange={(e) => setLectureDetails(prev => ({
+                      ...prev,
+                      lectureUrl: e.target.value,
+                    }))}
                     className={`w-full px-3 py-2 rounded border ${
-                      isDark
-                        ? "bg-gray-700 border-gray-600"
-                        : "bg-white border-gray-300"
+                      isDark ? "bg-gray-700 border-gray-600" : "bg-white border-gray-300"
                     }`}
                     placeholder="Enter YouTube or video URL"
                   />
@@ -686,12 +549,10 @@ const AddCourse = () => {
                     type="checkbox"
                     id="previewFree"
                     checked={lectureDetails.isPreviewFree}
-                    onChange={(e) =>
-                      setLectureDetails({
-                        ...lectureDetails,
-                        isPreviewFree: e.target.checked,
-                      })
-                    }
+                    onChange={(e) => setLectureDetails(prev => ({
+                      ...prev,
+                      isPreviewFree: e.target.checked,
+                    }))}
                     className="mr-2"
                   />
                   <label htmlFor="previewFree">Available as free preview</label>
@@ -702,9 +563,7 @@ const AddCourse = () => {
                     type="button"
                     onClick={() => setShowPopUp(false)}
                     className={`px-4 py-2 rounded ${
-                      isDark
-                        ? "bg-gray-700 hover:bg-gray-600"
-                        : "bg-gray-200 hover:bg-gray-300"
+                      isDark ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"
                     }`}
                   >
                     Cancel
@@ -713,9 +572,7 @@ const AddCourse = () => {
                     type="button"
                     onClick={handleAddLecture}
                     className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                    disabled={
-                      !lectureDetails.lectureTitle || !lectureDetails.lectureUrl
-                    }
+                    disabled={!lectureDetails.lectureTitle || !lectureDetails.lectureUrl}
                   >
                     Add Lecture
                   </button>
@@ -726,17 +583,16 @@ const AddCourse = () => {
         )}
 
         {/* Submit Button */}
-        
-        <span className="text-red-500">{isFormValid()?"":"Note : All fields are required"}</span>
+        <span className="text-red-500">{isFormValid() ? "" : "Note: All fields are required"}</span>
         <button
           type="submit"
-          className={` py-3 px-6 rounded-lg font-medium transition-colors ${
+          className={`py-3 px-6 rounded-lg font-medium transition-colors ${
             isDark
               ? isFormValid()
-                ? "bg-green-600 hover:bg-green-700 text-white cursor-pointer "
+                ? "bg-green-600 hover:bg-green-700 text-white cursor-pointer"
                 : "bg-gray-700 text-gray-400 cursor-not-allowed"
               : isFormValid()
-              ? "bg-green-500 hover:bg-green-600 text-white cursor-pointer "
+              ? "bg-green-500 hover:bg-green-600 text-white cursor-pointer"
               : "bg-gray-200 text-gray-500 cursor-not-allowed"
           }`}
           disabled={!isFormValid() || buttonText === "Adding Course..."}
