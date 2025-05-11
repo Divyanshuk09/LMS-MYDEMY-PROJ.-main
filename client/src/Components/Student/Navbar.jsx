@@ -67,7 +67,7 @@ const Navbar = () => {
     }
   `}
       >
-        <Link to={"/"} className="flex items-center">
+        <a href="/" className="flex items-center">
           <img src={logo} className="h-8 w-12" alt="Logo" />
           <span
             className={`${
@@ -76,7 +76,7 @@ const Navbar = () => {
           >
             MyDemy
           </span>
-        </Link>
+        </a>
 
         {/* Desktop view */}
         <div

@@ -19,7 +19,7 @@ const Navbar = () => {
           isDark ? "border-white" : "border-gray-500"
         } py-4 `}
       >
-        <Link title="Home" to={"/"} className="flex items-center">
+        <a href="/" className="flex items-center">
           <img src={logo} className="h-8 w-12" alt="Logo" />
           <span
             className={`${
@@ -28,7 +28,7 @@ const Navbar = () => {
           >
             MyDemy
           </span>
-        </Link>
+        </a>
 
         <div
           className={`flex items-center gap-2 ${

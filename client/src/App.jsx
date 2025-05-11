@@ -9,13 +9,13 @@ import Player from "./Pages/Student/Player";
 import Loading from "./Components/Student/Loading";
 import Educator from "./Pages/Educator/Educator";
 import Dashboard from "./Pages/Educator/Dashboard";
-import AddCourse from "./Pages/Educator/AddCourse";
 import MyCourses from "./Pages/Educator/MyCourses";
 import StudentEnrolled from "./Pages/Educator/StudentEnrolled";
 import Navbar from "./Components/Student/Navbar";
 import Hero from "./Components/Student/Hero";
 import { ToastContainer } from "react-toastify";
 import { useTheme } from "./Context/ThemeContext";
+import PrevAddCourse from "./Pages/Educator/AddCourse";
 
 // App.js
 const App = () => {
@@ -42,7 +42,7 @@ const App = () => {
         {/* Educator routes */}
         <Route path="/educator" element={<Educator />}>
           <Route index element={<Dashboard />} />
-          <Route path="add-course" element={<AddCourse />} />
+          <Route path="add-course" element={<PrevAddCourse />} />
           <Route path="my-courses" element={<MyCourses />} />
           <Route path="student-enrolled" element={<StudentEnrolled />} />
         </Route>

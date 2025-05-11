@@ -1,14 +1,31 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState, useCallback } from "react";
 import uniqid from "uniqid";
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
-import { FaDropbox, FaLink } from "react-icons/fa";
-import { MdArrowDropDown, MdClose, MdImage } from "react-icons/md";
-import Educator from '../../assets/Educator.svg'
+import { FaDropbox } from "react-icons/fa";
+import { MdArrowDropDown, MdClose, MdImage, MdEdit } from "react-icons/md";
+import Educator from '../../assets/Educator.svg';
 import { AppContext } from "../../Context/AppContext";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { useTheme } from "../../Context/ThemeContext";
+
+// Constants
+const INITIAL_FORM_STATE = {
+  courseTitle: "",
+  description: "",
+  coursePrice: 0,
+  discount: 0,
+  image: null,
+  imageUrl: "",
+};
+
+const INITIAL_LECTURE_STATE = {
+  lectureTitle: "",
+  lectureDuration: "",
+  lectureUrl: "",
+  isPreviewFree: false,
+};
 
 const AddCourse = () => {
   const { backendUrl, getToken } = useContext(AppContext);
@@ -17,58 +34,44 @@ const AddCourse = () => {
   const editorRef = useRef(null);
   const dropRef = useRef(null);
 
-  // Initial form state
-  const initialFormState = {
-    courseTitle: "",
-    description: "",
-    coursePrice: 0,
-    discount: 0,
-    image: null,
-    imageUrl: "",
-  };
-
-  const [formData, setFormData] = useState(initialFormState);
+  // State
+  const [formData, setFormData] = useState(INITIAL_FORM_STATE);
   const [errors, setErrors] = useState({});
   const [buttonText, setButtonText] = useState("Add Course");
   const [chapters, setChapters] = useState([]);
   const [showPopUp, setShowPopUp] = useState(false);
   const [currentChapterId, setCurrentChapterId] = useState(null);
-  const [lectureDetails, setLectureDetails] = useState({
-    lectureTitle: "",
-    lectureDuration: "",
-    lectureUrl: "",
-    isPreviewFree: false,
-  });
+  const [currentLectureId, setCurrentLectureId] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [lectureDetails, setLectureDetails] = useState(INITIAL_LECTURE_STATE);
   const [isDragging, setIsDragging] = useState(false);
 
   // Validate form fields
-  const validateForm = () => {
+  const validateForm = useCallback(() => {
     const newErrors = {
       courseTitle: !formData.courseTitle ? "Course title is required" : "",
       description: !formData.description ? "Description is required" : "",
       coursePrice: formData.coursePrice < 0 ? "Price cannot be negative" : "",
-      discount: formData.discount < 0 || formData.discount > 100 
-        ? "Discount must be between 0-100%" : "",
+      discount: formData.discount < 0 || formData.discount > 100 ? "Discount must be between 0-100%" : "",
       image: !formData.image ? "Thumbnail is required" : "",
     };
 
     setErrors(newErrors);
     return !Object.values(newErrors).some(error => error);
-  };
+  }, [formData]);
 
   // Check if form is valid
-  const isFormValid = () => {
+  const isFormValid = useCallback(() => {
     return formData.courseTitle &&
       formData.description &&
       formData.coursePrice >= 0 &&
-      formData.discount >= 0 &&
-      formData.discount <= 100 &&
+      formData.discount >= 0 && formData.discount <= 100 &&
       formData.image &&
       chapters.length > 0;
-  };
+  }, [formData, chapters]);
 
   // Handle drag events
-  const handleDrag = (e) => {
+  const handleDrag = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
     
@@ -77,38 +80,48 @@ const AddCourse = () => {
     } else if (e.type === 'dragleave' || e.type === 'drop') {
       setIsDragging(false);
     }
-  };
+  }, []);
 
-  const handleDrop = (e) => {
+  const handleDrop = useCallback((e) => {
     handleDrag(e);
     if (e.dataTransfer.files?.length) {
       const file = e.dataTransfer.files[0];
       handleImageUpload(file);
     }
-  };
+  }, [handleDrag]);
 
-  const handleImageUpload = (file) => {
+  const handleImageUpload = useCallback((file) => {
     if (file?.type.startsWith("image/")) {
       setFormData(prev => ({ ...prev, image: file, imageUrl: "" }));
       setErrors(prev => ({ ...prev, image: "" }));
     } else {
       setErrors(prev => ({ ...prev, image: "Please upload an image file" }));
     }
-  };
+  }, []);
 
   // Chapter management
-  const handleChapter = (action, chapterId) => {
+  const handleChapter = useCallback((action, chapterId, currentTitle = "") => {
     switch (action) {
       case "add":
-        const title = prompt("Enter the Chapter Name:");
+        const title = prompt("Enter the Chapter Name:", currentTitle);
         if (title) {
-          setChapters(prev => [...prev, {
-            chapterId: uniqid(),
-            chapterTitle: title,
-            chapterContent: [],
-            collapsed: false,
-            chapterOrder: prev.length > 0 ? prev.slice(-1)[0].chapterOrder + 1 : 1,
-          }]);
+          if (currentTitle) {
+            // Editing existing chapter
+            setChapters(prev => prev.map(chapter => 
+              chapter.chapterId === chapterId 
+                ? { ...chapter, chapterTitle: title } 
+                : chapter
+            ));
+          } else {
+            // Adding new chapter
+            setChapters(prev => [...prev, {
+              chapterId: uniqid(),
+              chapterTitle: title,
+              chapterContent: [],
+              collapsed: false,
+              chapterOrder: prev.length > 0 ? prev.slice(-1)[0].chapterOrder + 1 : 1,
+            }]);
+          }
         }
         break;
       case "remove":
@@ -121,15 +134,32 @@ const AddCourse = () => {
             : chapter
         ));
         break;
+      case "edit":
+        handleChapter("add", chapterId, currentTitle);
+        break;
       default:
         break;
     }
-  };
+  }, []);
 
   // Lecture management
-  const handleLecture = (action, chapterId, lectureIndex) => {
+  const handleLecture = useCallback((action, chapterId, lectureIndex, lecture = null) => {
     if (action === "add") {
       setCurrentChapterId(chapterId);
+      setCurrentLectureId(null);
+      setIsEditing(false);
+      setLectureDetails(INITIAL_LECTURE_STATE);
+      setShowPopUp(true);
+    } else if (action === "edit") {
+      setCurrentChapterId(chapterId);
+      setCurrentLectureId(lecture.lectureId);
+      setIsEditing(true);
+      setLectureDetails({
+        lectureTitle: lecture.lectureTitle,
+        lectureDuration: lecture.lectureDuration,
+        lectureUrl: lecture.lectureUrl,
+        isPreviewFree: lecture.isPreviewFree,
+      });
       setShowPopUp(true);
     } else if (action === "remove") {
       setChapters(prev => prev.map(chapter => {
@@ -141,9 +171,9 @@ const AddCourse = () => {
         return chapter;
       }));
     }
-  };
+  }, []);
 
-  const handleAddLecture = () => {
+  const handleAddLecture = useCallback(() => {
     if (!lectureDetails.lectureTitle || !lectureDetails.lectureUrl) {
       toast.error("Please fill all lecture details");
       return;
@@ -151,32 +181,40 @@ const AddCourse = () => {
 
     setChapters(prev => prev.map(chapter => {
       if (chapter.chapterId === currentChapterId) {
-        const newLecture = {
-          ...lectureDetails,
-          lectureOrder: chapter.chapterContent.length > 0 
-            ? chapter.chapterContent.slice(-1)[0].lectureOrder + 1 
-            : 1,
-          lectureId: uniqid(),
-        };
-        return {
-          ...chapter,
-          chapterContent: [...chapter.chapterContent, newLecture],
-        };
+        if (isEditing && currentLectureId) {
+          // Update existing lecture
+          const updatedContent = chapter.chapterContent.map(lecture => 
+            lecture.lectureId === currentLectureId
+              ? { ...lectureDetails, lectureId: currentLectureId, lectureOrder: lecture.lectureOrder }
+              : lecture
+          );
+          return { ...chapter, chapterContent: updatedContent };
+        } else {
+          // Add new lecture
+          const newLecture = {
+            ...lectureDetails,
+            lectureOrder: chapter.chapterContent.length > 0 
+              ? chapter.chapterContent.slice(-1)[0].lectureOrder + 1 
+              : 1,
+            lectureId: uniqid(),
+          };
+          return {
+            ...chapter,
+            chapterContent: [...chapter.chapterContent, newLecture],
+          };
+        }
       }
       return chapter;
     }));
 
     setShowPopUp(false);
-    setLectureDetails({
-      lectureTitle: "",
-      lectureDuration: "",
-      lectureUrl: "",
-      isPreviewFree: false,
-    });
-  };
+    setLectureDetails(INITIAL_LECTURE_STATE);
+    setIsEditing(false);
+    setCurrentLectureId(null);
+  }, [currentChapterId, currentLectureId, isEditing, lectureDetails]);
 
   // Form submission
-  const handleSubmit = async (e) => {
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
 
     if (!validateForm()) {
@@ -214,9 +252,11 @@ const AddCourse = () => {
       if (data.success) {
         toast.success(data.message);
         // Reset form
-        setFormData(initialFormState);
+        setFormData(INITIAL_FORM_STATE);
         setChapters([]);
-        quillRef.current?.root?.innerHTML && (quillRef.current.root.innerHTML = "");
+        if (quillRef.current?.root?.innerHTML) {
+          quillRef.current.root.innerHTML = "";
+        }
       } else {
         toast.error(data.message);
       }
@@ -227,7 +267,7 @@ const AddCourse = () => {
     } finally {
       setButtonText("Add Course");
     }
-  };
+  }, [validateForm, chapters, formData, backendUrl, getToken]);
 
   // Initialize Quill editor
   useEffect(() => {
@@ -245,12 +285,20 @@ const AddCourse = () => {
         },
       });
 
-      quillRef.current.on("text-change", () => {
+      const handleTextChange = () => {
         setFormData(prev => ({
           ...prev,
           description: quillRef.current.root.innerHTML,
         }));
-      });
+      };
+
+      quillRef.current.on("text-change", handleTextChange);
+
+      return () => {
+        if (quillRef.current) {
+          quillRef.current.off("text-change", handleTextChange);
+        }
+      };
     }
   }, []);
 
@@ -342,7 +390,7 @@ const AddCourse = () => {
         {/* Course Price */}
         <div className="flex flex-col gap-1">
           <label className={isDark ? "text-gray-200" : "text-black"}>
-            Course Price (in $) *
+            Course Price (in $)
           </label>
           <input
             onChange={(e) => setFormData(prev => ({ ...prev, coursePrice: e.target.value }))}
@@ -360,7 +408,7 @@ const AddCourse = () => {
         {/* Discount */}
         <div className="flex flex-col gap-1">
           <label className={isDark ? "text-gray-200" : "text-black"}>
-            Discount (%) *
+            Discount (%)
           </label>
           <input
             onChange={(e) => setFormData(prev => ({ ...prev, discount: e.target.value }))}
@@ -403,13 +451,21 @@ const AddCourse = () => {
                     {chapter.chapterOrder}. {chapter.chapterTitle}
                   </span>
                 </div>
-                <span className="text-gray-500">
-                  {chapter.chapterContent.length} Lectures
-                </span>
-                <MdClose
-                  onClick={() => handleChapter("remove", chapter.chapterId)}
-                  className="cursor-pointer hover:text-red-500"
-                />
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-500">
+                    {chapter.chapterContent.length} Lectures
+                  </span>
+                  <MdEdit
+                    onClick={() => handleChapter("edit", chapter.chapterId, chapter.chapterTitle)}
+                    className="cursor-pointer hover:text-blue-500"
+                    title="Edit chapter"
+                  />
+                  <MdClose
+                    onClick={() => handleChapter("remove", chapter.chapterId)}
+                    className="cursor-pointer hover:text-red-500"
+                    title="Remove chapter"
+                  />
+                </div>
               </div>
 
               {!chapter.collapsed && (
@@ -445,10 +501,18 @@ const AddCourse = () => {
                             )}
                           </div>
                         </div>
-                        <MdClose
-                          className="cursor-pointer hover:text-red-500"
-                          onClick={() => handleLecture("remove", chapter.chapterId, lectureIndex)}
-                        />
+                        <div className="flex items-center gap-1">
+                          <MdEdit
+                            onClick={() => handleLecture("edit", chapter.chapterId, lectureIndex, lecture)}
+                            className="cursor-pointer hover:text-blue-500"
+                            title="Edit lecture"
+                          />
+                          <MdClose
+                            onClick={() => handleLecture("remove", chapter.chapterId, lectureIndex)}
+                            className="cursor-pointer hover:text-red-500"
+                            title="Remove lecture"
+                          />
+                        </div>
                       </div>
                     ))
                   )}
@@ -478,16 +542,22 @@ const AddCourse = () => {
           </button>
         </div>
 
-        {/* Add Lecture Popup */}
+        {/* Add/Edit Lecture Popup */}
         {showPopUp && (
           <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-black/50 z-50">
             <div className={`${
               isDark ? "bg-gray-800 text-gray-200" : "bg-white text-gray-800"
             } rounded-lg p-6 w-full max-w-md shadow-xl`}>
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-semibold">Add New Lecture</h3>
+                <h3 className="text-xl font-semibold">
+                  {isEditing ? "Edit Lecture" : "Add New Lecture"}
+                </h3>
                 <button
-                  onClick={() => setShowPopUp(false)}
+                  onClick={() => {
+                    setShowPopUp(false);
+                    setLectureDetails(INITIAL_LECTURE_STATE);
+                    setIsEditing(false);
+                  }}
                   className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
                 >
                   <MdClose size={20} />
@@ -561,7 +631,11 @@ const AddCourse = () => {
                 <div className="flex justify-end gap-3 pt-4">
                   <button
                     type="button"
-                    onClick={() => setShowPopUp(false)}
+                    onClick={() => {
+                      setShowPopUp(false);
+                      setLectureDetails(INITIAL_LECTURE_STATE);
+                      setIsEditing(false);
+                    }}
                     className={`px-4 py-2 rounded ${
                       isDark ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"
                     }`}
@@ -574,7 +648,7 @@ const AddCourse = () => {
                     className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                     disabled={!lectureDetails.lectureTitle || !lectureDetails.lectureUrl}
                   >
-                    Add Lecture
+                    {isEditing ? "Update Lecture" : "Add Lecture"}
                   </button>
                 </div>
               </div>
@@ -583,7 +657,7 @@ const AddCourse = () => {
         )}
 
         {/* Submit Button */}
-        <span className="text-red-500">{isFormValid() ? "" : "Note: All fields are required"}</span>
+        <span className="text-red-500">{isFormValid() ? "" : "Note: All fields are required except price & discount."}</span>
         <button
           type="submit"
           className={`py-3 px-6 rounded-lg font-medium transition-colors ${
@@ -601,7 +675,7 @@ const AddCourse = () => {
         </button>
       </form>
       <div className="mt-20 pl-15 xl:block hidden">
-        <img src={Educator} alt="" />
+        <img src={Educator} alt="Educator illustration" />
       </div>
     </div>
   );
