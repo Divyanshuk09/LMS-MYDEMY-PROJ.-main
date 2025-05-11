@@ -128,9 +128,6 @@ const MyCourses = () => {
 
                   {/* Course Thumbnail & Title */}
                   <td
-                    onClick={() =>
-                      navigate(`/educator/my-courses/${course._id}`)
-                    }
                     className="px-6 py-4 whitespace-nowrap flex items-center gap-3"
                   >
                     <img
@@ -149,9 +146,7 @@ const MyCourses = () => {
 
                   {/* Earnings */}
                   <td
-                    onClick={() =>
-                      navigate(`/educator/my-courses/${course._id}`)
-                    }
+                    
                     className={`px-6 py-4 ${
                       isDark ? "text-gray-300" : "text-gray-900"
                     }`}
@@ -166,9 +161,7 @@ const MyCourses = () => {
 
                   {/* Students */}
                   <td
-                    onClick={() =>
-                      navigate(`/educator/my-courses/${course._id}`)
-                    }
+                   
                     className={`px-6 py-4 ${
                       isDark ? "text-gray-300" : "text-gray-900"
                     }`}
@@ -178,9 +171,6 @@ const MyCourses = () => {
 
                   {/* Published Date */}
                   <td
-                    onClick={() =>
-                      navigate(`/educator/my-courses/${course._id}`)
-                    }
                     className={`px-6 py-4 ${
                       isDark ? "text-gray-300" : "text-gray-900"
                     }`}
